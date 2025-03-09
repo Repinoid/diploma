@@ -15,8 +15,6 @@ import (
 
 var host = "localhost:8081"
 
-// пока без горутин select for update и проч 
-
 func main() {
 	logger, err := zap.NewDevelopment()
 	if err != nil {
@@ -28,6 +26,7 @@ func main() {
 	if err := initEnvs(); err != nil {
 		panic(err)
 	}
+	//	inter = models.Interbase
 
 	if err := run(); err != nil {
 		panic(err)
@@ -38,14 +37,19 @@ func run() error {
 	var err error
 	ctx := context.Background()
 
-	securitate.DataBase, err = securitate.ConnectToDB(ctx)
+	//	models.Interbase, err = securitate.ConnectToDB(ctx)
+//	models.Interbase, err = securitate.ConnectToDB(ctx)
+	dBase, err := securitate.ConnectToDB(ctx)
 
 	if err != nil {
 		fmt.Printf("database connection error  %v", err)
 		return err
 	}
 
+	securitate.Interbase = dBase
+
 	router := mux.NewRouter()
+	//	router.Use()
 
 	router.HandleFunc("/api/user/register", handlers.RegisterUser).Methods("POST")
 	router.HandleFunc("/api/user/login", handlers.LoginUser).Methods("POST")

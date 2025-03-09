@@ -146,7 +146,7 @@ func TestDBstruct_AddOrder(t *testing.T) {
 			errToken: "add TOKEN",
 		},
 	}
-	ctx = context.Background()
+	ctx = req.Context()
 	dataBase, err := ConnectToDB(ctx)
 	if err != nil {
 		fmt.Printf("database connection error  %v", err)
@@ -172,7 +172,7 @@ func TestDBstruct_AddOrder(t *testing.T) {
 }
 
 func dropTables() error {
-	ctx = context.Background()
+	ctx = req.Context()
 	dataBase, err := ConnectToDB(ctx)
 	if err != nil {
 		return fmt.Errorf("database connection error  %w", err)

@@ -32,6 +32,8 @@ func initEnvs() error {
 	flag.StringVar(&acchostFlag, "r", rual.Accrualhost, "Only -a={host:port} flag is allowed here")
 	flag.Parse()
 
+	securitate.DBEndPoint = "postgres://postgres:passwordas@localhost:5432/forgo"
+
 	if _, exists := os.LookupEnv("RUN_ADDRESS"); !exists { // если закомментить все IF ниже - у флагов будет приоритет перед переменными окружения
 		host = hostFlag
 		fmt.Printf("flag host   %s \n", host)

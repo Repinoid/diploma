@@ -32,7 +32,7 @@ type OrderStatus struct {
 	Accrual float64 `json:"accrual"`
 }
 
-var Accrualhost = "localhost:8089"
+var Accrualhost = "localhost:8080"
 var Time429 time.Time
 
 var marks = []Buyback{

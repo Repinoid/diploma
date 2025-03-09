@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -25,7 +24,7 @@ func Withdraw(rwr http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	UserID, err := securitate.DataBase.LoginByToken(rwr, req)
+	UserID, err := securitate.Interbase.LoginByToken(rwr, req)
 	if err != nil {
 		return
 	}
@@ -53,30 +52,33 @@ func Withdraw(rwr http.ResponseWriter, req *http.Request) {
 		return
 	}
 	var orderID int64
-	err = securitate.DataBase.GetIDByOrder(context.Background(), orderNum, &orderID)
+	err = securitate.Interbase.GetIDByOrder(req.Context(), orderNum, &orderID)
 	if err != nil { // если такого номера заказа нет в базе вносим его
 
-		db := securitate.DataBase.DB
-		ordr := "SELECT (SELECT SUM(orders.accrual) FROM orders where orders.usercode=$1)- " +
-			"(SELECT COALESCE(SUM(withdrawn.amount),0) FROM withdrawn where withdrawn.usercode=$1) ;"
-		row := db.QueryRow(context.Background(), ordr, UserID) //
-		var accs float64                                       // денег на счету
-		err := row.Scan(&accs)
+		current, withdr, err := securitate.Interbase.GetBalanceAndWithdrawn(req.Context(), UserID)
+
+		//	db := securitate.Interbase.DB
+		// ordr := "SELECT (SELECT SUM(orders.accrual) FROM orders where orders.usercode=$1)- " +
+		// 	"(SELECT COALESCE(SUM(withdrawn.amount),0) FROM withdrawn where withdrawn.usercode=$1) ;"
+		// row := db.QueryRow(req.Context(), ordr, UserID) //
+		// var accs float64                                // денег на счету
+		// err := row.Scan(&accs)
 		if err != nil {
 			rwr.WriteHeader(http.StatusUnprocessableEntity) // 422 — неверный формат номера заказа;
 			fmt.Fprintf(rwr, `{"status":"StatusUnprocessableEntity"}`)
 			models.Sugar.Debugf("422 — невернная сумма на списание; %d\n", wdrStruct.Sum)
 			return
 		}
-		if wdrStruct.Sum > accs {
+		if wdrStruct.Sum > current-withdr { // денег на счету
 			rwr.WriteHeader(http.StatusPaymentRequired) //402 Payment Required
 			fmt.Fprintf(rwr, `{"status":"StatusPaymentRequired"}`)
 			models.Sugar.Debug("402 Payment Required\n")
 			return
 		}
 		// -------------------------------------------------------------------------
-		ordr = "INSERT INTO withdrawn(userCode, orderNumber, amount) VALUES ($1, $2, $3) ;"
-		_, err = db.Exec(context.Background(), ordr, UserID, orderNum, wdrStruct.Sum)
+		err = securitate.Interbase.AddToWithdrawn(req.Context(), UserID, orderNum, wdrStruct.Sum)
+		//	ordr := "INSERT INTO withdrawn(userCode, orderNumber, amount) VALUES ($1, $2, $3) ;"
+		//	_, err = db.Exec(req.Context(), ordr, UserID, orderNum, wdrStruct.Sum)
 		if err != nil {
 			rwr.WriteHeader(http.StatusInternalServerError) //500 — внутренняя ошибка сервера.
 			fmt.Fprintf(rwr, `{"status":"StatusInternalServerError"}`)
@@ -84,7 +86,7 @@ func Withdraw(rwr http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		err = securitate.DataBase.UpLoadOrderByID(context.Background(), UserID, orderNum, "REGISTERED", 0)
+		err = securitate.Interbase.UpLoadOrderByID(req.Context(), UserID, orderNum, "REGISTERED", 0)
 		if err != nil {
 			rwr.WriteHeader(http.StatusInternalServerError) //500 — внутренняя ошибка сервера.
 			fmt.Fprintf(rwr, `{"status":"StatusInternalServerError"}`)

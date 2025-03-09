@@ -11,116 +11,30 @@ import (
 	pgx "github.com/jackc/pgx/v5"
 )
 
-type DBstruct struct {
-	DB *pgx.Conn
-}
 
-var DataBase *DBstruct
 
-var DBEndPoint = "postgres://postgres:passwordas@localhost:5432/forgo"
+func ConnectToDB(ctx context.Context) (*DBstruct, error) {
 
-// соединение с базой данных
-func ConnectUsersTable(ctx context.Context, DBEndPoint string) (*DBstruct, error) {
 	dataBase := &DBstruct{}
 	baza, err := pgx.Connect(ctx, DBEndPoint)
 	if err != nil {
 		return nil, fmt.Errorf("can't connect to DB %s err %w", DBEndPoint, err)
 	}
 	dataBase.DB = baza
-	return dataBase, nil
-}
 
-func (dataBase *DBstruct) UsersTableCreation(ctx context.Context) error {
-
-	db := dataBase.DB
-	db.Exec(ctx, "CREATE EXTENSION pgcrypto;") // расширение для хэширования паролей
-
-	creatorOrder :=
-		"CREATE TABLE IF NOT EXISTS " + "accounts" +
-			"(userCode INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY ," +
-			"login VARCHAR(100) UNIQUE," +
-			"password VARCHAR(200) NOT NULL," +
-			"user_created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);"
-
-	_, err := db.Exec(ctx, creatorOrder)
-	if err != nil {
-		return fmt.Errorf("create users table. %w", err)
-	}
-	return nil
-}
-func (dataBase *DBstruct) OrdersTableCreation(ctx context.Context) error {
-	db := dataBase.DB
-	creatorOrder :=
-		"CREATE TABLE IF NOT EXISTS " + "orders" +
-			"(id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY," +
-			"userCode INT NOT NULL," +
-			"orderNumber BIGINT NOT NULL UNIQUE," +
-			"orderStatus VARCHAR(20)," +
-			"accrual FLOAT8," +
-			"uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
-			"FOREIGN KEY (userCode) REFERENCES " + "accounts" + "(usercode) ON DELETE CASCADE);"
-
-	_, err := db.Exec(ctx, creatorOrder)
-	if err != nil {
-		return fmt.Errorf("create orders table. %w", err)
-	}
-	return nil
-}
-
-func (dataBase *DBstruct) TokensTableCreation(ctx context.Context) error {
-	db := dataBase.DB
-	creatorOrder :=
-		"CREATE TABLE IF NOT EXISTS " + "tokens" +
-			"(id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY," +
-			"userCode INT NOT NULL UNIQUE," +
-			//			"balance FLOAT8 DEFAULT 0," +
-			//			"bonus FLOAT8 DEFAULT 0," +
-			"token VARCHAR(1000) NOT NULL," +
-			"token_valid_until TIMESTAMP," +
-			"token_created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
-			"FOREIGN KEY (userCode) REFERENCES " + "accounts" + "(usercode) ON DELETE CASCADE);"
-	_, err := db.Exec(ctx, creatorOrder)
-	if err != nil {
-		return fmt.Errorf("create orders table. %w", err)
-	}
-	return nil
-}
-func (dataBase *DBstruct) WithdrawalsTableCreation(ctx context.Context) error {
-	db := dataBase.DB
-	creatorOrder :=
-		"CREATE TABLE IF NOT EXISTS " + "withdrawn" +
-			"(id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY," +
-			"userCode INT NOT NULL," +
-			"orderNumber BIGINT NOT NULL UNIQUE," +
-			"amount FLOAT8 DEFAULT 0," +
-			"processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
-			"FOREIGN KEY (userCode) REFERENCES " + "accounts" + "(usercode) ON DELETE CASCADE);"
-	_, err := db.Exec(ctx, creatorOrder)
-	if err != nil {
-		return fmt.Errorf("create orders table. %w", err)
-	}
-	return nil
-}
-
-func ConnectToDB(ctx context.Context) (*DBstruct, error) {
-	DB, err := ConnectUsersTable(ctx, DBEndPoint)
-	if err != nil {
-		fmt.Printf("database connection error  %v", err)
-		return nil, err
-	}
-	if err := DB.UsersTableCreation(ctx); err != nil {
+	if err := dataBase.UsersTableCreation(ctx); err != nil {
 		return nil, fmt.Errorf("UsersTableCreation %w", err)
 	}
-	if err := DB.OrdersTableCreation(ctx); err != nil {
+	if err := dataBase.OrdersTableCreation(ctx); err != nil {
 		return nil, fmt.Errorf("OrdersTableCreation %w", err)
 	}
-	if err := DB.TokensTableCreation(ctx); err != nil {
+	if err := dataBase.TokensTableCreation(ctx); err != nil {
 		return nil, fmt.Errorf("TokensTableCreation %w", err)
 	}
-	if err := DB.WithdrawalsTableCreation(ctx); err != nil {
+	if err := dataBase.WithdrawalsTableCreation(ctx); err != nil {
 		return nil, fmt.Errorf("WithdrawalsTableCreation %w", err)
 	}
-	return DB, nil
+	return dataBase, nil
 }
 
 func (dataBase *DBstruct) AddUser(ctx context.Context, userName, password, tokenString string) error {
@@ -257,7 +171,7 @@ func (dataBase *DBstruct) LoginByToken(rwr http.ResponseWriter, req *http.Reques
 	var UserID int64
 	if niceP && niceS {
 		order := "SELECT usercode from " + "tokens" + " WHERE token =  $1 ;"
-		row := dataBase.DB.QueryRow(context.Background(), order, tokenStr)
+		row := dataBase.DB.QueryRow(req.Context(), order, tokenStr)
 		err := row.Scan(&UserID)
 		if err == nil {
 			return UserID, nil
