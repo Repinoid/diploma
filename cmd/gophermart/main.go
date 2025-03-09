@@ -13,7 +13,7 @@ import (
 	"go.uber.org/zap"
 )
 
-var host = "localhost:8081"
+var host = "localhost:8080"
 
 func main() {
 	logger, err := zap.NewDevelopment()
@@ -38,7 +38,7 @@ func run() error {
 	ctx := context.Background()
 
 	//	models.Interbase, err = securitate.ConnectToDB(ctx)
-//	models.Interbase, err = securitate.ConnectToDB(ctx)
+	//	models.Interbase, err = securitate.ConnectToDB(ctx)
 	dBase, err := securitate.ConnectToDB(ctx)
 
 	if err != nil {
