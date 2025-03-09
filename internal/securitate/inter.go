@@ -52,4 +52,7 @@ type Inter interface {
 	AddToWithdrawn(ctx context.Context, UserID, orderNum int64, sum float64) (err error)
 }
 
-var Interbase Inter
+
+
+var Interbase *DBstruct
+//var Interbase Inter
