@@ -10,6 +10,8 @@ import (
 )
 
 func initEnvs() error {
+	securitate.DBEndPoint = "postgres://postgres:passwordas@localhost:5432/forgo"
+
 	enva, exists := os.LookupEnv("RUN_ADDRESS")
 	if exists {
 		host = enva
@@ -27,12 +29,10 @@ func initEnvs() error {
 	}
 
 	var hostFlag, dbFlag, acchostFlag string
-	flag.StringVar(&hostFlag, "a", host, "Only -a={host:port} flag is allowed here")
-	flag.StringVar(&dbFlag, "d", securitate.DBEndPoint, "Only -a={host:port} flag is allowed here")
-	flag.StringVar(&acchostFlag, "r", rual.Accrualhost, "Only -a={host:port} flag is allowed here")
+	flag.StringVar(&hostFlag, "a", host, "")
+	flag.StringVar(&dbFlag, "d", securitate.DBEndPoint, "")
+	flag.StringVar(&acchostFlag, "r", rual.Accrualhost, "")
 	flag.Parse()
-
-	securitate.DBEndPoint = "postgres://postgres:passwordas@localhost:5432/forgo"
 
 	if _, exists := os.LookupEnv("RUN_ADDRESS"); !exists { // если закомментить все IF ниже - у флагов будет приоритет перед переменными окружения
 		host = hostFlag
