@@ -60,16 +60,17 @@ func (suite *TstHandlers) TearDownSuite() { // // выполняется пос�
 func (suite *TstHandlers) BeforeTest(suiteName, testName string) { // выполняется перед каждым тестом
 	var err error
 	securitate.Interbase, err = securitate.ConnectToDB(suite.ctx)
-	if err != nil {
-		log.Printf("database connection error  %v", err)
-		return
-	}
-	log.Println("BeforeTest()", suiteName, testName)
+	suite.Require().NoErrorf(err, "err %v", err)
+	// if err != nil {
+	// 	log.Printf("database connection error  %v", err)
+	// 	return
+	// }
+	//	log.Println("BeforeTest()", suiteName, testName)
 }
 
 func (suite *TstHandlers) AfterTest(suiteName, testName string) { // // выполняется после каждого теста
 	securitate.Interbase.DB.Close(suite.ctx)
-	log.Println("AfterTest()", suiteName, testName)
+	//	log.Println("AfterTest()", suiteName, testName)
 }
 func TestHandlersSuite(t *testing.T) {
 	log.Println("before run")
