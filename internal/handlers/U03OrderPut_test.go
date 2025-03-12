@@ -132,7 +132,7 @@ func (suite *TstHandlers) Test03OrderPut() {
 	for _, tt := range tests {
 		suite.Run(tt.testName, func() {
 			var token string
-			err := securitate.Interbase.GetToken(suite.ctx, tt.userName, &token)
+			securitate.Interbase.GetToken(suite.ctx, tt.userName, &token)
 			tokenStr := "Bearer <" + token + tt.TokenSuffix
 
 			request := httptest.NewRequest(http.MethodPost, tt.urla, bytes.NewBufferString(strconv.Itoa(tt.orderNum)))
