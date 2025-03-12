@@ -39,7 +39,7 @@ func (suite *TstHandlers) Test04Add5Users() {
 		userName := fmt.Sprintf("user%02d", i+1)
 		password := fmt.Sprintf("pass%02d", i+1)
 		lo, _ := json.Marshal(logos{UserName: userName, Password: password})
-		request := httptest.NewRequestWithContext(suite.ctx, http.MethodPost, "/api/user/register", bytes.NewBuffer(lo))
+		request := httptest.NewRequest(http.MethodPost, "/api/user/register", bytes.NewBuffer(lo))
 		request.Header.Set("Content-Type", "application/json")
 
 		w := httptest.NewRecorder()
@@ -159,7 +159,7 @@ func (suite *TstHandlers) Test01UserRegister() {
 		suite.Run(tt.testName, func() {
 			lo, _ := json.Marshal(logos{UserName: tt.userName, Password: tt.password})
 			//			request := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/api/user/register", bytes.NewBuffer(lo))
-			request := httptest.NewRequestWithContext(suite.ctx, http.MethodPost, tt.urla, bytes.NewBuffer(lo))
+			request := httptest.NewRequest(http.MethodPost, tt.urla, bytes.NewBuffer(lo))
 			request.Header.Set("Content-Type", "application/json")
 			w := httptest.NewRecorder()
 			RegisterUser(w, request)
