@@ -42,7 +42,7 @@ func (suite *TstHandlers) Test04Add5Users() {
 		request.Header.Set("Content-Type", "application/json")
 
 		w := httptest.NewRecorder()
-		RegisterUser(w, request)
+		Interbase.RegisterUser(w, request)
 		res := w.Result()
 		defer res.Body.Close()
 		_, err := io.ReadAll(res.Body)
@@ -50,7 +50,7 @@ func (suite *TstHandlers) Test04Add5Users() {
 
 		var token string
 		for j := range ordq {
-			err := dataBase.GetToken(suite.ctx, userName, &token)
+			err := Interbase.GetToken(suite.ctx, userName, &token)
 			suite.Require().NoError(err, "GetToken err")
 			tokenStr := "Bearer <" + token + ">"
 
@@ -59,7 +59,7 @@ func (suite *TstHandlers) Test04Add5Users() {
 			w = httptest.NewRecorder()
 			request.Header.Set("Content-Type", "text/plain")
 			request.Header.Set("Authorization", tokenStr)
-			PutOrder(w, request)
+			Interbase.PutOrder(w, request)
 			res := w.Result()
 			defer res.Body.Close()
 			_, err = io.ReadAll(res.Body)
@@ -68,18 +68,18 @@ func (suite *TstHandlers) Test04Add5Users() {
 	}
 }
 
-func (suite *TstHandlers) Test00DropTables() {
+// func (suite *TstHandlers) Test00DropTables() {
 
-	//	dataBase, err := securitate.ConnectToDB(suite.ctx) // local DB
-	//	suite.Require().NoErrorf(err, "err %v", err)
-	for _, tab := range []string{"orders", "tokens", "withdrawn", "accounts"} {
-		dropOrder := "DROP TABLE " + tab + " ;"
-		_, err := dataBase.DB.Exec(suite.ctx, dropOrder)
-		//		_, err := dataBase.DB.Exec(suite.ctx, dropOrder)
-		suite.Assert().NoErrorf(err, "err %v", err)
-	}
-	//	dataBase.DB.Close(suite.ctx)
-}
+// 	//	dataBase, err := securitate.ConnectToDB(suite.ctx) // local DB
+// 	//	suite.Require().NoErrorf(err, "err %v", err)
+// 	for _, tab := range []string{"orders", "tokens", "withdrawn", "accounts"} {
+// 		dropOrder := "DROP TABLE " + tab + " ;"
+// 		_, err := Interbase.Exec(suite.ctx, dropOrder)
+// 		//		_, err := dataBase.DB.Exec(suite.ctx, dropOrder)
+// 		suite.Assert().NoErrorf(err, "err %v", err)
+// 	}
+// 	//	dataBase.DB.Close(suite.ctx)
+// }
 
 func (suite *TstHandlers) Test01UserRegister() {
 	type logos struct {
@@ -160,7 +160,7 @@ func (suite *TstHandlers) Test01UserRegister() {
 			request := httptest.NewRequest(http.MethodPost, tt.urla, bytes.NewBuffer(lo))
 			request.Header.Set("Content-Type", "application/json")
 			w := httptest.NewRecorder()
-			RegisterUser(w, request)
+			Interbase.RegisterUser(w, request)
 			res := w.Result()
 			defer res.Body.Close()
 			resBody, err := io.ReadAll(res.Body)
@@ -177,7 +177,7 @@ func (suite *TstHandlers) Test01UserRegister() {
 				require.NotEqual(suite.T(), tok.Token, "")
 
 				var tokenFromBase string
-				err = dataBase.GetToken(suite.ctx, tt.userName, &tokenFromBase)
+				err = Interbase.GetToken(suite.ctx, tt.userName, &tokenFromBase)
 				if err != nil {
 					fmt.Printf("tst %v", err)
 					return

@@ -31,6 +31,7 @@ type TableCreations interface {
 	OrdersTableCreation(ctx context.Context) error
 	TokensTableCreation(ctx context.Context) error
 	WithdrawalsTableCreation(ctx context.Context) error
+	CloseBase(ctx context.Context) error
 }
 
 type Handlera interface {
@@ -62,4 +63,3 @@ type Inter interface {
 	GetBalanceAndWithdrawn(ctx context.Context, UserID int64) (current, withdr float64, err error)
 	AddToWithdrawn(ctx context.Context, UserID, orderNum int64, sum float64) (err error)
 }
-

@@ -22,6 +22,8 @@ type TstHandlers struct {
 	ctx  context.Context
 }
 
+var Interbase securitate.Inter
+
 func (suite *TstHandlers) SetupSuite() { // выполняется перед тестами
 	//var err error
 	suite.ctx = context.Background()
@@ -33,10 +35,13 @@ func (suite *TstHandlers) SetupSuite() { // выполняется перед т
 
 	securitate.DBEndPoint = "postgres://postgres:passwordas@localhost:5432/forgo"
 
-	// ctx := req.Context()
-	// dataBase, err := securitate.ConnectToDB(ctx) // local DB
-	// suite.Require().NoErrorf(err, "err %v", err)
-	// defer dataBase.DB.Close(ctx)
+	dataBase, err := securitate.ConnectToDB(suite.ctx) // local DB
+	for _, tab := range []string{"orders", "tokens", "withdrawn", "accounts"} {
+		dropOrder := "DROP TABLE " + tab + " ;"
+		_, err := dataBase.DB.Exec(suite.ctx, dropOrder)
+		suite.Require().NoErrorf(err, "err %v", err)
+	}
+	dataBase.DB.Close(suite.ctx)
 
 	logger, err := zap.NewDevelopment()
 	if err != nil {
@@ -48,7 +53,6 @@ func (suite *TstHandlers) SetupSuite() { // выполняется перед т
 	log.Println("SetupTest() ---------------------")
 	err = rual.InitAccrualForTests()
 	suite.Require().NoErrorf(err, "err %v", err)
-	//	suite.Assert().NoErrorf(err, "err %v", err)
 }
 
 func (suite *TstHandlers) TearDownSuite() { // // выполняется после всех тестов
@@ -59,18 +63,13 @@ func (suite *TstHandlers) TearDownSuite() { // // выполняется пос�
 
 func (suite *TstHandlers) BeforeTest(suiteName, testName string) { // выполняется перед каждым тестом
 	var err error
-	securitate.Interbase, err = securitate.ConnectToDB(suite.ctx)
+	Interbase, err = securitate.ConnectToDB(suite.ctx)
 	suite.Require().NoErrorf(err, "err %v", err)
-	// if err != nil {
-	// 	log.Printf("database connection error  %v", err)
-	// 	return
-	// }
-	//	log.Println("BeforeTest()", suiteName, testName)
 }
 
 func (suite *TstHandlers) AfterTest(suiteName, testName string) { // // выполняется после каждого теста
-	dataBase.DB.Close(suite.ctx)
-	//	log.Println("AfterTest()", suiteName, testName)
+	err := Interbase.CloseBase(suite.ctx)
+	suite.Require().NoErrorf(err, "err %v", err)
 }
 func TestHandlersSuite(t *testing.T) {
 	log.Println("before run")

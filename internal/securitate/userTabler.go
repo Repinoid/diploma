@@ -11,8 +11,6 @@ import (
 	pgx "github.com/jackc/pgx/v5"
 )
 
-
-
 func ConnectToDB(ctx context.Context) (*DBstruct, error) {
 
 	dataBase := &DBstruct{}
@@ -35,6 +33,10 @@ func ConnectToDB(ctx context.Context) (*DBstruct, error) {
 		return nil, fmt.Errorf("WithdrawalsTableCreation %w", err)
 	}
 	return dataBase, nil
+}
+
+func (dataBase *DBstruct) CloseBase(ctx context.Context) error {
+	return dataBase.DB.Close(ctx)
 }
 
 func (dataBase *DBstruct) AddUser(ctx context.Context, userName, password, tokenString string) error {
