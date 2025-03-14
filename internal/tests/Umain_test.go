@@ -36,6 +36,7 @@ func (suite *TstHandlers) SetupSuite() { // выполняется перед т
 	securitate.DBEndPoint = "postgres://postgres:passwordas@localhost:5432/forgo"
 
 	dataBase, err := securitate.ConnectToDB(suite.ctx) // local DB
+	suite.Require().NoErrorf(err, "err %v", err)
 	for _, tab := range []string{"orders", "tokens", "withdrawn", "accounts"} {
 		dropOrder := "DROP TABLE " + tab + " ;"
 		_, err := dataBase.DB.Exec(suite.ctx, dropOrder)
