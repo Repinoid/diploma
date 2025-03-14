@@ -69,7 +69,7 @@ func (suite *TstHandlers) BeforeTest(suiteName, testName string) { // выпол
 }
 
 func (suite *TstHandlers) AfterTest(suiteName, testName string) { // // выполняется после каждого теста
-	securitate.Interbase.DB.Close(suite.ctx)
+	dataBase.DB.Close(suite.ctx)
 	//	log.Println("AfterTest()", suiteName, testName)
 }
 func TestHandlersSuite(t *testing.T) {

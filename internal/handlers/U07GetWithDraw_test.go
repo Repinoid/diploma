@@ -45,12 +45,12 @@ func (suite *TstHandlers) Test07GetDraws() {
 	// 	fmt.Printf("database connection error  %v", err)
 	// 	return
 	// }
-	// defer securitate.Interbase.DB.Close(suite.ctx)
+	// defer dataBase.DB.Close(suite.ctx)
 
 	for _, tt := range tests {
 		suite.Run(tt.testName, func() {
 			var token string
-			securitate.Interbase.GetToken(suite.ctx, tt.username, &token)
+			dataBase.GetToken(suite.ctx, tt.username, &token)
 			request := httptest.NewRequest(http.MethodGet, "/api/user/withdrawals", nil)
 			w := httptest.NewRecorder()
 			request.Header.Set("Content-Type", "application/json")

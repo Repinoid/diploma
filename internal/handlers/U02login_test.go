@@ -77,7 +77,7 @@ func (suite *TstHandlers) Test02UserLogin() {
 		fmt.Printf("database connection error  %v", err)
 		return
 	}
-	defer securitate.Interbase.DB.Close(suite.ctx)
+	defer dataBase.DB.Close(suite.ctx)
 
 	for _, tt := range tests {
 		suite.Run(tt.testName, func() {

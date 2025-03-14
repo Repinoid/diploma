@@ -9,7 +9,6 @@ import (
 	"strconv"
 
 	"github.com/Repinoid/diploma56/internal/rual"
-	"github.com/Repinoid/diploma56/internal/securitate"
 )
 
 func (suite *TstHandlers) Test03OrderPut() {
@@ -132,7 +131,7 @@ func (suite *TstHandlers) Test03OrderPut() {
 	for _, tt := range tests {
 		suite.Run(tt.testName, func() {
 			var token string
-			securitate.Interbase.GetToken(suite.ctx, tt.userName, &token)
+			dataBase.GetToken(suite.ctx, tt.userName, &token)
 			tokenStr := "Bearer <" + token + tt.TokenSuffix
 
 			request := httptest.NewRequest(http.MethodPost, tt.urla, bytes.NewBufferString(strconv.Itoa(tt.orderNum)))

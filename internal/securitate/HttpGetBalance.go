@@ -1,4 +1,4 @@
-package handlers
+package securitate
 
 import (
 	"encoding/json"
@@ -6,18 +6,17 @@ import (
 	"net/http"
 
 	"github.com/Repinoid/diploma56/internal/models"
-	"github.com/Repinoid/diploma56/internal/securitate"
 )
 
-func GetBalance(rwr http.ResponseWriter, req *http.Request) {
+func (dataBase *DBstruct) GetBalance(rwr http.ResponseWriter, req *http.Request) {
 	rwr.Header().Set("Content-Type", "application/json")
 
-	UserID, err := securitate.Interbase.LoginByToken(rwr, req)
+	UserID, err := dataBase.LoginByToken(rwr, req)
 	if err != nil {
 		return
 	}
 
-	current, withdr, err := securitate.Interbase.GetBalanceAndWithdrawn(req.Context(), UserID)
+	current, withdr, err := dataBase.GetBalanceAndWithdrawn(req.Context(), UserID)
 	if err != nil {
 		rwr.WriteHeader(http.StatusInternalServerError) // //500 — внутренняя ошибка сервера.
 		fmt.Fprintf(rwr, `{"status":"StatusInternalServerError"}`)

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Repinoid/diploma56/internal/handlers"
 	"github.com/Repinoid/diploma56/internal/models"
 	"github.com/Repinoid/diploma56/internal/securitate"
 
@@ -26,7 +25,6 @@ func main() {
 	if err := initEnvs(); err != nil {
 		panic(err)
 	}
-	//	inter = models.Interbase
 
 	if err := run(); err != nil {
 		panic(err)
@@ -35,30 +33,26 @@ func main() {
 
 func run() error {
 	var err error
+	var Interbase securitate.Inter // переменная интерфейса, описание в internal/securitate/Inter.go
 	ctx := context.Background()
 
-	//	models.Interbase, err = securitate.ConnectToDB(ctx)
-	//	models.Interbase, err = securitate.ConnectToDB(ctx)
-	dBase, err := securitate.ConnectToDB(ctx)
+	Interbase, err = securitate.ConnectToDB(ctx)
 
 	if err != nil {
 		fmt.Printf("database connection error  %v", err)
 		return err
 	}
 
-	securitate.Interbase = dBase
-
 	router := mux.NewRouter()
-	//	router.Use()
 
-	router.HandleFunc("/api/user/register", handlers.RegisterUser).Methods("POST")
-	router.HandleFunc("/api/user/login", handlers.LoginUser).Methods("POST")
-	router.HandleFunc("/api/user/balance/withdraw", handlers.Withdraw).Methods("POST")
+	router.HandleFunc("/api/user/register", Interbase.RegisterUser).Methods("POST")
+	router.HandleFunc("/api/user/login", Interbase.LoginUser).Methods("POST")
+	router.HandleFunc("/api/user/balance/withdraw", Interbase.Withdraw).Methods("POST")
 
-	router.HandleFunc("/api/user/orders", handlers.PutOrder).Methods("POST")
-	router.HandleFunc("/api/user/orders", handlers.GetOrders).Methods("GET")
-	router.HandleFunc("/api/user/withdrawals", handlers.GetWithDrawals).Methods("GET")
-	router.HandleFunc("/api/user/balance", handlers.GetBalance).Methods("GET")
+	router.HandleFunc("/api/user/orders", Interbase.PutOrder).Methods("POST")
+	router.HandleFunc("/api/user/orders", Interbase.GetOrders).Methods("GET")
+	router.HandleFunc("/api/user/withdrawals", Interbase.GetWithDrawals).Methods("GET")
+	router.HandleFunc("/api/user/balance", Interbase.GetBalance).Methods("GET")
 
 	return http.ListenAndServe(host, router)
 }

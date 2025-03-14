@@ -10,7 +10,6 @@ import (
 	"strconv"
 
 	"github.com/Repinoid/diploma56/internal/rual"
-	"github.com/Repinoid/diploma56/internal/securitate"
 )
 
 func (suite *TstHandlers) Test06WithDraw() {
@@ -66,7 +65,7 @@ func (suite *TstHandlers) Test06WithDraw() {
 	for _, tt := range tests {
 		suite.Run(tt.testName, func() {
 			var token string
-			securitate.Interbase.GetToken(suite.ctx, tt.userName, &token)
+			dataBase.GetToken(suite.ctx, tt.userName, &token)
 			tokenStr := "Bearer <" + token + ">"
 
 			OrderStr := strconv.Itoa(tt.orderNum)

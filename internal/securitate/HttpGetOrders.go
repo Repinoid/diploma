@@ -1,4 +1,4 @@
-package handlers
+package securitate
 
 import (
 	"encoding/json"
@@ -6,21 +6,20 @@ import (
 	"net/http"
 
 	"github.com/Repinoid/diploma56/internal/models"
-	"github.com/Repinoid/diploma56/internal/securitate"
 )
 
-func GetOrders(rwr http.ResponseWriter, req *http.Request) {
+func (dataBase *DBstruct) GetOrders(rwr http.ResponseWriter, req *http.Request) {
 
 	rwr.Header().Set("Content-Type", "application/json")
 
-	UserID, err := securitate.Interbase.LoginByToken(rwr, req)
+	UserID, err := dataBase.LoginByToken(rwr, req)
 	if err != nil {
 		return
 	}
 
-	orda, status, err := securitate.Interbase.OrdersList(req.Context(), UserID)
+	orda, status, err := dataBase.OrdersList(req.Context(), UserID)
 
-	// db := securitate.Interbase.DB
+	// db := dataBase.DB
 	// order := "select ordernumber as number, orderstatus as status, accrual, uploaded_at from orders where usercode=$1 order by uploaded_at ;"
 
 	// rows, err := db.Query(req.Context(), order, UserID) //

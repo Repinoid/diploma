@@ -1,4 +1,4 @@
-package handlers
+package securitate
 
 import (
 	"fmt"
@@ -9,12 +9,11 @@ import (
 
 	"github.com/Repinoid/diploma56/internal/models"
 	"github.com/Repinoid/diploma56/internal/rual"
-	"github.com/Repinoid/diploma56/internal/securitate"
 
 	"github.com/theplant/luhn"
 )
 
-func PutOrder(rwr http.ResponseWriter, req *http.Request) {
+func (dataBase *DBstruct) PutOrder(rwr http.ResponseWriter, req *http.Request) {
 
 	rwr.Header().Set("Content-Type", "application/json")
 
@@ -25,7 +24,7 @@ func PutOrder(rwr http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	tokenID, err := securitate.Interbase.LoginByToken(rwr, req)
+	tokenID, err := dataBase.LoginByToken(rwr, req)
 	if err != nil {
 		return // http.StatusUnauthorized set on LoginByToken
 	}
@@ -48,12 +47,12 @@ func PutOrder(rwr http.ResponseWriter, req *http.Request) {
 		return
 	}
 	var orderID int64
-	err = securitate.Interbase.GetIDByOrder(req.Context(), orderNum, &orderID)
+	err = dataBase.GetIDByOrder(req.Context(), orderNum, &orderID)
 	if err != nil { // если такого номера заказа нет в базе вносим его
 
 		orderStat, _, _ := rual.GetFromAccrual(orderStr)
 
-		if securitate.Interbase.UpLoadOrderByID(req.Context(), tokenID,
+		if dataBase.UpLoadOrderByID(req.Context(), tokenID,
 			orderNum, orderStat.Status, orderStat.Accrual) != nil {
 			rwr.WriteHeader(http.StatusInternalServerError) //500 — внутренняя ошибка сервера.
 			fmt.Fprintf(rwr, `{"status":"StatusInternalServerError"}`)

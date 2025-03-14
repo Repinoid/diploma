@@ -1,4 +1,4 @@
-package handlers
+package securitate
 
 import (
 	"encoding/json"
@@ -9,12 +9,11 @@ import (
 	"strings"
 
 	"github.com/Repinoid/diploma56/internal/models"
-	"github.com/Repinoid/diploma56/internal/securitate"
 
 	"github.com/theplant/luhn"
 )
 
-func Withdraw(rwr http.ResponseWriter, req *http.Request) {
+func (dataBase *DBstruct) Withdraw(rwr http.ResponseWriter, req *http.Request) {
 	rwr.Header().Set("Content-Type", "application/json")
 
 	if !strings.Contains(req.Header.Get("Content-Type"), "application/json") {
@@ -24,7 +23,7 @@ func Withdraw(rwr http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	UserID, err := securitate.Interbase.LoginByToken(rwr, req)
+	UserID, err := dataBase.LoginByToken(rwr, req)
 	if err != nil {
 		return
 	}
@@ -52,12 +51,12 @@ func Withdraw(rwr http.ResponseWriter, req *http.Request) {
 		return
 	}
 	var orderID int64
-	err = securitate.Interbase.GetIDByOrder(req.Context(), orderNum, &orderID)
+	err = dataBase.GetIDByOrder(req.Context(), orderNum, &orderID)
 	if err != nil { // если такого номера заказа нет в базе вносим его
 
-		current, withdr, err := securitate.Interbase.GetBalanceAndWithdrawn(req.Context(), UserID)
+		current, withdr, err := dataBase.GetBalanceAndWithdrawn(req.Context(), UserID)
 
-		//	db := securitate.Interbase.DB
+		//	db := dataBase.DB
 		// ordr := "SELECT (SELECT SUM(orders.accrual) FROM orders where orders.usercode=$1)- " +
 		// 	"(SELECT COALESCE(SUM(withdrawn.amount),0) FROM withdrawn where withdrawn.usercode=$1) ;"
 		// row := db.QueryRow(req.Context(), ordr, UserID) //
@@ -76,7 +75,7 @@ func Withdraw(rwr http.ResponseWriter, req *http.Request) {
 			return
 		}
 		// -------------------------------------------------------------------------
-		err = securitate.Interbase.AddToWithdrawn(req.Context(), UserID, orderNum, wdrStruct.Sum)
+		err = dataBase.AddToWithdrawn(req.Context(), UserID, orderNum, wdrStruct.Sum)
 		//	ordr := "INSERT INTO withdrawn(userCode, orderNumber, amount) VALUES ($1, $2, $3) ;"
 		//	_, err = db.Exec(req.Context(), ordr, UserID, orderNum, wdrStruct.Sum)
 		if err != nil {
@@ -86,7 +85,7 @@ func Withdraw(rwr http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		err = securitate.Interbase.UpLoadOrderByID(req.Context(), UserID, orderNum, "REGISTERED", 0)
+		err = dataBase.UpLoadOrderByID(req.Context(), UserID, orderNum, "REGISTERED", 0)
 		if err != nil {
 			rwr.WriteHeader(http.StatusInternalServerError) //500 — внутренняя ошибка сервера.
 			fmt.Fprintf(rwr, `{"status":"StatusInternalServerError"}`)

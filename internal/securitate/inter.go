@@ -33,7 +33,18 @@ type TableCreations interface {
 	WithdrawalsTableCreation(ctx context.Context) error
 }
 
+type Handlera interface {
+	RegisterUser(rwr http.ResponseWriter, req *http.Request)
+	LoginUser(rwr http.ResponseWriter, req *http.Request)
+	Withdraw(rwr http.ResponseWriter, req *http.Request)
+	PutOrder(rwr http.ResponseWriter, req *http.Request)
+	GetOrders(rwr http.ResponseWriter, req *http.Request)
+	GetWithDrawals(rwr http.ResponseWriter, req *http.Request)
+	GetBalance(rwr http.ResponseWriter, req *http.Request)
+}
+
 type Inter interface {
+	Handlera
 	TableCreations
 	AddUser(ctx context.Context, userName, password, tokenString string) error
 	CheckUserPassword(ctx context.Context, userName, password string) error
@@ -52,7 +63,3 @@ type Inter interface {
 	AddToWithdrawn(ctx context.Context, UserID, orderNum int64, sum float64) (err error)
 }
 
-
-
-var Interbase *DBstruct
-//var Interbase Inter

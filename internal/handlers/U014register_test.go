@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/Repinoid/diploma56/internal/rual"
-	"github.com/Repinoid/diploma56/internal/securitate"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -33,7 +32,7 @@ func (suite *TstHandlers) Test04Add5Users() {
 	// 	fmt.Printf("database connection error  %v", err)
 	// 	return
 	// }
-	// defer securitate.Interbase.DB.Close(suite.ctx)
+	// defer dataBase.DB.Close(suite.ctx)
 
 	for i := range userq {
 		userName := fmt.Sprintf("user%02d", i+1)
@@ -51,7 +50,7 @@ func (suite *TstHandlers) Test04Add5Users() {
 
 		var token string
 		for j := range ordq {
-			err := securitate.Interbase.GetToken(suite.ctx, userName, &token)
+			err := dataBase.GetToken(suite.ctx, userName, &token)
 			suite.Require().NoError(err, "GetToken err")
 			tokenStr := "Bearer <" + token + ">"
 
@@ -71,16 +70,15 @@ func (suite *TstHandlers) Test04Add5Users() {
 
 func (suite *TstHandlers) Test00DropTables() {
 
-
-//	dataBase, err := securitate.ConnectToDB(suite.ctx) // local DB
-//	suite.Require().NoErrorf(err, "err %v", err)
+	//	dataBase, err := securitate.ConnectToDB(suite.ctx) // local DB
+	//	suite.Require().NoErrorf(err, "err %v", err)
 	for _, tab := range []string{"orders", "tokens", "withdrawn", "accounts"} {
 		dropOrder := "DROP TABLE " + tab + " ;"
-		_, err := securitate.Interbase.DB.Exec(suite.ctx, dropOrder)
-//		_, err := dataBase.DB.Exec(suite.ctx, dropOrder)
+		_, err := dataBase.DB.Exec(suite.ctx, dropOrder)
+		//		_, err := dataBase.DB.Exec(suite.ctx, dropOrder)
 		suite.Assert().NoErrorf(err, "err %v", err)
 	}
-//	dataBase.DB.Close(suite.ctx)
+	//	dataBase.DB.Close(suite.ctx)
 }
 
 func (suite *TstHandlers) Test01UserRegister() {
@@ -153,7 +151,7 @@ func (suite *TstHandlers) Test01UserRegister() {
 	// 	fmt.Printf("database connection error  %v", err)
 	// 	return
 	// }
-	// defer securitate.Interbase.DB.Close(suite.ctx)
+	// defer dataBase.DB.Close(suite.ctx)
 
 	for _, tt := range tests {
 		suite.Run(tt.testName, func() {
@@ -179,7 +177,7 @@ func (suite *TstHandlers) Test01UserRegister() {
 				require.NotEqual(suite.T(), tok.Token, "")
 
 				var tokenFromBase string
-				err = securitate.Interbase.GetToken(suite.ctx, tt.userName, &tokenFromBase)
+				err = dataBase.GetToken(suite.ctx, tt.userName, &tokenFromBase)
 				if err != nil {
 					fmt.Printf("tst %v", err)
 					return
