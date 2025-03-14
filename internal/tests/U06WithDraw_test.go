@@ -1,4 +1,4 @@
-package handlers
+package tests
 
 // Basic imports
 import (
@@ -55,17 +55,10 @@ func (suite *TstHandlers) Test06WithDraw() {
 		},
 	}
 
-	//var err error
-	// models.Interbase, err = securitate.ConnectToDB(suite.ctx)
-	// if err != nil {
-	// 	fmt.Printf("database connection error  %v", err)
-	// 	return
-	// }
-
 	for _, tt := range tests {
 		suite.Run(tt.testName, func() {
 			var token string
-			dataBase.GetToken(suite.ctx, tt.userName, &token)
+			Interbase.GetToken(suite.ctx, tt.userName, &token)
 			tokenStr := "Bearer <" + token + ">"
 
 			OrderStr := strconv.Itoa(tt.orderNum)
@@ -78,7 +71,7 @@ func (suite *TstHandlers) Test06WithDraw() {
 			w := httptest.NewRecorder()
 			request.Header.Set("Content-Type", tt.ContentType)
 			request.Header.Set("Authorization", tokenStr)
-			Withdraw(w, request)
+			Interbase.Withdraw(w, request)
 			res := w.Result()
 			defer res.Body.Close()
 			resBody, err := io.ReadAll(res.Body)

@@ -1,10 +1,9 @@
-package handlers
+package tests
 
 // Basic imports
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -12,7 +11,6 @@ import (
 	"time"
 
 	"github.com/Repinoid/diploma56/internal/rual"
-	"github.com/Repinoid/diploma56/internal/securitate"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -71,21 +69,13 @@ func (suite *TstHandlers) Test02UserLogin() {
 		},
 	}
 
-	var err error
-	securitate.Interbase, err = securitate.ConnectToDB(suite.ctx)
-	if err != nil {
-		fmt.Printf("database connection error  %v", err)
-		return
-	}
-	defer dataBase.DB.Close(suite.ctx)
-
 	for _, tt := range tests {
 		suite.Run(tt.testName, func() {
 			lo, _ := json.Marshal(logos{UserName: tt.userName, Password: tt.password})
 			request := httptest.NewRequest(http.MethodPost, tt.urla, bytes.NewBuffer(lo))
 			w := httptest.NewRecorder()
 			request.Header.Set("Content-Type", "application/json")
-			LoginUser(w, request)
+			Interbase.LoginUser(w, request)
 			res := w.Result()
 			defer res.Body.Close()
 			resBody, err := io.ReadAll(res.Body)
@@ -110,7 +100,7 @@ func (suite *TstHandlers) Test02UserLogin() {
 					w := httptest.NewRecorder()
 					request.Header.Set("Content-Type", "text/plain")
 					request.Header.Set("Authorization", "Bearer <"+tok.Token+">")
-					PutOrder(w, request)
+					Interbase.PutOrder(w, request)
 					res := w.Result()
 					defer res.Body.Close()
 					resBody, err := io.ReadAll(res.Body)

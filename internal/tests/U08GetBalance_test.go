@@ -1,4 +1,4 @@
-package handlers
+package tests
 
 // Basic imports
 import (
@@ -50,12 +50,12 @@ func (suite *TstHandlers) Test08GetBalance() {
 	for _, tt := range tests {
 		suite.Run(tt.testName, func() {
 			var token string
-			dataBase.GetToken(suite.ctx, tt.username, &token)
+			Interbase.GetToken(suite.ctx, tt.username, &token)
 			request := httptest.NewRequest(http.MethodGet, "/api/user/balance", nil)
 			w := httptest.NewRecorder()
 			request.Header.Set("Content-Type", "application/json")
 			request.Header.Set("Authorization", "Bearer <"+token+">")
-			GetBalance(w, request)
+			Interbase.GetBalance(w, request)
 			res := w.Result()
 			defer res.Body.Close()
 			resBody, err := io.ReadAll(res.Body)
