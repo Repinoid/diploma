@@ -24,7 +24,7 @@ func (dataBase *DBstruct) PutOrder(rwr http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	tokenID, err := dataBase.LoginByToken(rwr, req)
+	UserID, err := dataBase.LoginByToken(rwr, req)
 	if err != nil {
 		return // http.StatusUnauthorized set on LoginByToken
 	}
@@ -52,7 +52,7 @@ func (dataBase *DBstruct) PutOrder(rwr http.ResponseWriter, req *http.Request) {
 
 		orderStat, _, _ := rual.GetFromAccrual(orderStr)
 
-		if dataBase.UpLoadOrderByID(req.Context(), tokenID,
+		if dataBase.UpLoadOrderByID(req.Context(), UserID,
 			orderNum, orderStat.Status, orderStat.Accrual) != nil {
 			rwr.WriteHeader(http.StatusInternalServerError) //500 — внутренняя ошибка сервера.
 			fmt.Fprintf(rwr, `{"status":"StatusInternalServerError"}`)
@@ -64,7 +64,7 @@ func (dataBase *DBstruct) PutOrder(rwr http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(rwr, `{"status":"StatusAccepted"}`)
 		return
 	}
-	if orderID == tokenID {
+	if orderID == UserID {
 		rwr.WriteHeader(http.StatusOK) // 200 — номер заказа уже был загружен ЭТИМ пользователем;
 		fmt.Fprintf(rwr, `{"status":"StatusOK"}`)
 		models.Sugar.Debug("200 — номер заказа уже был загружен ЭТИМ пользователем;\n")
