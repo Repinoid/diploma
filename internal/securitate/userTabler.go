@@ -126,13 +126,10 @@ func (dataBase *DBstruct) GetToken(ctx context.Context, userName string, tokenSt
 	return nil
 }
 
-func (dataBase *DBstruct) UpLoadOrderByID(ctx context.Context, userID int64, orderNumber int64, orderStatus string, accrual float64) error {
+func (dataBase *DBstruct) UpLoadOrderByID(ctx context.Context, userID int64, orderNumber int64, orderStatus string) error {
 	db := dataBase.DB
-	if orderStatus == "" || orderStatus == "REGISTERED" {
-		orderStatus = "NEW"
-	}
-	order := "INSERT INTO orders(userCode, orderNumber, orderStatus, accrual) VALUES ($1, $2, $3, $4) ;"
-	_, err := db.Exec(ctx, order, userID, orderNumber, orderStatus, accrual)
+	order := "INSERT INTO orders(userCode, orderNumber, orderStatus, accrual) VALUES ($1, $2, $3, 0) ;" // accrual 0
+	_, err := db.Exec(ctx, order, userID, orderNumber, orderStatus)
 	if err != nil {
 		return fmt.Errorf("add ORDER %w", err)
 	}
@@ -152,17 +149,17 @@ func (dataBase *DBstruct) GetIDByOrder(ctx context.Context, orderNum int64, orde
 	return nil
 }
 
-func (dataBase *DBstruct) AddOrder(ctx context.Context, userName string, orderNumber int64, orderStatus string, accrual float64) error {
-	db := dataBase.DB
+// func (dataBase *DBstruct) AddOrder(ctx context.Context, userName string, orderNumber int64, orderStatus string, accrual float64) error {
+// 	db := dataBase.DB
 
-	order := "INSERT INTO orders(userCode, ordernumber, orderStatus, accrual) VALUES ((select id from accounts where login = $1), $2, $3, $4) ;"
+// 	order := "INSERT INTO orders(userCode, ordernumber, orderStatus, accrual) VALUES ((select id from accounts where login = $1), $2, $3, $4) ;"
 
-	_, err := db.Exec(ctx, order, userName, orderNumber, orderStatus, accrual)
-	if err != nil {
-		return fmt.Errorf("add ORDER %w", err)
-	}
-	return nil
-}
+// 	_, err := db.Exec(ctx, order, userName, orderNumber, orderStatus, accrual)
+// 	if err != nil {
+// 		return fmt.Errorf("add ORDER %w", err)
+// 	}
+// 	return nil
+// }
 
 func (dataBase *DBstruct) LoginByToken(rwr http.ResponseWriter, req *http.Request) (int64, error) {
 

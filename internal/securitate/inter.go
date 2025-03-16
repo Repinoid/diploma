@@ -8,7 +8,8 @@ import (
 )
 
 type DBstruct struct {
-	DB *pgx.Conn
+	DB     *pgx.Conn
+	UserID int64
 }
 
 var DBEndPoint string
@@ -53,13 +54,15 @@ type Inter interface {
 	ChangePassword(ctx context.Context, userName string, password string) error
 	UpdateToken(ctx context.Context, userName string, tokenString string) error
 	GetToken(ctx context.Context, userName string, tokenString *string) error
-	UpLoadOrderByID(ctx context.Context, userID int64, orderNumber int64, orderStatus string, accrual float64) error
+	UpLoadOrderByID(ctx context.Context, userID int64, orderNumber int64, orderStatus string) error
 	GetIDByOrder(ctx context.Context, orderNum int64, orderID *int64) error
-	AddOrder(ctx context.Context, userName string, orderNumber int64, orderStatus string, accrual float64) error
+	//	AddOrder(ctx context.Context, userName string, orderNumber int64, orderStatus string, accrual float64) error
 	LoginByToken(rwr http.ResponseWriter, req *http.Request) (int64, error)
 
 	OrdersList(ctx context.Context, UserID int64) (orda []OrdStruct, status int, err error)
 	WithdrawalsList(ctx context.Context, UserID int64) (orda []WithStruct, status int, err error)
 	GetBalanceAndWithdrawn(ctx context.Context, UserID int64) (current, withdr float64, err error)
 	AddToWithdrawn(ctx context.Context, UserID, orderNum int64, sum float64) (err error)
+
+	AccuOrders(ctx context.Context) (err error)
 }

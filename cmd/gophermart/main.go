@@ -54,5 +54,7 @@ func run() error {
 	router.HandleFunc("/api/user/withdrawals", Interbase.GetWithDrawals).Methods("GET")
 	router.HandleFunc("/api/user/balance", Interbase.GetBalance).Methods("GET")
 
+	go Interbase.AccuOrders(ctx)
+
 	return http.ListenAndServe(host, router)
 }

@@ -85,7 +85,7 @@ func (dataBase *DBstruct) Withdraw(rwr http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		err = dataBase.UpLoadOrderByID(req.Context(), UserID, orderNum, "REGISTERED", 0)
+		err = dataBase.UpLoadOrderByID(req.Context(), UserID, orderNum, "INVALID")	// INVALID - т.к. заказ не принят к расчёту, и вознаграждение не будет начислено;
 		if err != nil {
 			rwr.WriteHeader(http.StatusInternalServerError) //500 — внутренняя ошибка сервера.
 			fmt.Fprintf(rwr, `{"status":"StatusInternalServerError"}`)

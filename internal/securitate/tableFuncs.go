@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Repinoid/diploma56/internal/models"
+	"github.com/Repinoid/diploma56/internal/rual"
 )
 
 func (dataBase *DBstruct) GetBalanceAndWithdrawn(ctx context.Context, UserID int64) (current, withdr float64, err error) {
@@ -96,4 +97,49 @@ func (dataBase *DBstruct) WithdrawalsList(ctx context.Context, UserID int64) (or
 	}
 	status = http.StatusOK
 	return
+}
+
+func (dataBase *DBstruct) AccuOrders(ctx context.Context) (err error) {
+
+	db := dataBase.DB
+	order := "select ordernumber as number, orderstatus as status, accrual from orders ;" // ALL orders
+
+	for {
+
+		rows, err := db.Query(ctx, order) //
+		if err != nil {
+			//		status = http.StatusInternalServerError //500 — внутренняя ошибка сервера.
+			models.Sugar.Debugf("db.Query %+v\n", err)
+			//		return
+		}
+		ord := OrdStruct{}
+		var errScan error
+		for rows.Next() {
+			errScan = rows.Scan(&ord.Number, &ord.Status, &ord.Accrual)
+			if errScan != nil {
+				break
+			}
+			if ord.Status == "INVALID" || ord.Status == "PROCESSED" { // Статусы `INVALID` и `PROCESSED` являются окончательными.
+				continue
+			}
+			accuOrderStat, _, _ := rual.GetFromAccrual(ord.Number)
+			updateOrder := "UPDATE orders SET orderStatus = $2, accrual = $3 WHERE orderNumber  = $1 ;"
+			_, err := db.Exec(ctx, updateOrder, ord.Number, accuOrderStat.Status, accuOrderStat.Accrual)
+			if err != nil {
+				//		status = http.StatusInternalServerError //500 — внутренняя ошибка сервера.
+				models.Sugar.Debugf("db.Exec update %+v\n", err)
+			}
+
+		}
+		rows.Close()
+
+		if err = rows.Err(); err != nil || errScan != nil { // Err returns any error that occurred while reading. Err must only be called after the Rows is closed
+			//		status = http.StatusInternalServerError // //500 — внутренняя ошибка сервера.
+			models.Sugar.Debugf("db.Query %+v\n", err)
+			//	return
+		}
+		time.Sleep(time.Second)
+	}
+	//	status = http.StatusOK
+	//	return
 }

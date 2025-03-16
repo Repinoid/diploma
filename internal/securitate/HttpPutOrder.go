@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/Repinoid/diploma56/internal/models"
-	"github.com/Repinoid/diploma56/internal/rual"
 
 	"github.com/theplant/luhn"
 )
@@ -50,10 +49,9 @@ func (dataBase *DBstruct) PutOrder(rwr http.ResponseWriter, req *http.Request) {
 	err = dataBase.GetIDByOrder(req.Context(), orderNum, &orderID)
 	if err != nil { // если такого номера заказа нет в базе вносим его
 
-		orderStat, _, _ := rual.GetFromAccrual(orderStr)
+		//	orderStat, _, _ := rual.GetFromAccrual(orderStr)
 
-		if dataBase.UpLoadOrderByID(req.Context(), UserID,
-			orderNum, orderStat.Status, orderStat.Accrual) != nil {
+		if dataBase.UpLoadOrderByID(req.Context(), UserID, orderNum, "NEW") != nil {
 			rwr.WriteHeader(http.StatusInternalServerError) //500 — внутренняя ошибка сервера.
 			fmt.Fprintf(rwr, `{"status":"StatusInternalServerError"}`)
 			models.Sugar.Debug("500 — внутренняя ошибка сервера.\n")
