@@ -34,10 +34,17 @@ func main() {
 func run() error {
 	var err error
 	var Interbase securitate.Inter // переменная интерфейса, описание в internal/securitate/Inter.go
+	var Accu *securitate.DBstruct
 	ctx := context.Background()
 
 	Interbase, err = securitate.ConnectToDB(ctx)
 
+	if err != nil {
+		fmt.Printf("database connection error  %v", err)
+		return err
+	}
+
+	Accu, err = securitate.ConnectToDB(ctx)
 	if err != nil {
 		fmt.Printf("database connection error  %v", err)
 		return err
@@ -54,7 +61,7 @@ func run() error {
 	router.HandleFunc("/api/user/withdrawals", Interbase.GetWithDrawals).Methods("GET")
 	router.HandleFunc("/api/user/balance", Interbase.GetBalance).Methods("GET")
 
-	go Interbase.AccuOrders(ctx)
+	go Accu.AccuOrders(ctx)
 
 	return http.ListenAndServe(host, router)
 }

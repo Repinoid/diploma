@@ -99,20 +99,22 @@ func (dataBase *DBstruct) WithdrawalsList(ctx context.Context, UserID int64) (or
 	return
 }
 
+// func (dataBase *DBstruct) AccuOrders(ctx context.Context) (err error) {
 func (dataBase *DBstruct) AccuOrders(ctx context.Context) (err error) {
 
 	db := dataBase.DB
-	order := "select ordernumber as number, orderstatus as status, accrual from orders ;" // ALL orders
+	order := "select ordernumber as number, orderstatus as status, accrual from orders FOR UPDATE;" // ALL orders
 
 	for {
 
+		ord := OrdStruct{}
+		orda := []OrdStruct{}
 		rows, err := db.Query(ctx, order) //
 		if err != nil {
 			//		status = http.StatusInternalServerError //500 — внутренняя ошибка сервера.
 			models.Sugar.Debugf("db.Query %+v\n", err)
 			//		return
 		}
-		ord := OrdStruct{}
 		var errScan error
 		for rows.Next() {
 			errScan = rows.Scan(&ord.Number, &ord.Status, &ord.Accrual)
@@ -122,14 +124,7 @@ func (dataBase *DBstruct) AccuOrders(ctx context.Context) (err error) {
 			if ord.Status == "INVALID" || ord.Status == "PROCESSED" { // Статусы `INVALID` и `PROCESSED` являются окончательными.
 				continue
 			}
-			accuOrderStat, _, _ := rual.GetFromAccrual(ord.Number)
-			updateOrder := "UPDATE orders SET orderStatus = $2, accrual = $3 WHERE orderNumber  = $1 ;"
-			_, err := db.Exec(ctx, updateOrder, ord.Number, accuOrderStat.Status, accuOrderStat.Accrual)
-			if err != nil {
-				//		status = http.StatusInternalServerError //500 — внутренняя ошибка сервера.
-				models.Sugar.Debugf("db.Exec update %+v\n", err)
-			}
-
+			orda = append(orda, ord)
 		}
 		rows.Close()
 
@@ -137,6 +132,32 @@ func (dataBase *DBstruct) AccuOrders(ctx context.Context) (err error) {
 			//		status = http.StatusInternalServerError // //500 — внутренняя ошибка сервера.
 			models.Sugar.Debugf("db.Query %+v\n", err)
 			//	return
+		}
+
+		tx, err := db.Begin(ctx)
+		if err != nil {
+			models.Sugar.Debugf("error db.Begin  %[1]w", err)
+		}
+
+		for _, ord := range orda {
+			accuOrderStat, status, err := rual.GetFromAccrual(ord.Number)
+			if err != nil {
+				models.Sugar.Debugf("GetFromAccrual stat %d %v", status, err)
+				continue
+			}
+			updateOrder := "UPDATE orders SET orderStatus = $2, accrual = $3 WHERE orderNumber  = $1 ;"
+			_, err = tx.Exec(ctx, updateOrder, ord.Number, accuOrderStat.Status, accuOrderStat.Accrual)
+			if err != nil {
+				defer tx.Rollback(ctx)
+				models.Sugar.Debugf("error exex %v", err)
+				return err
+			}
+
+		}
+		err = tx.Commit(ctx)
+		if err != nil {
+			//		status = http.StatusInternalServerError //500 — внутренняя ошибка сервера.
+			models.Sugar.Debugf(" tx.Commit %+v\n", err)
 		}
 		time.Sleep(time.Second)
 	}
