@@ -8,6 +8,7 @@ import (
 	"github.com/Repinoid/diploma56/internal/models"
 )
 
+// api/user/orders
 func (dataBase *DBstruct) GetOrders(rwr http.ResponseWriter, req *http.Request) {
 
 	rwr.Header().Set("Content-Type", "application/json")
@@ -19,37 +20,6 @@ func (dataBase *DBstruct) GetOrders(rwr http.ResponseWriter, req *http.Request) 
 
 	orda, status, err := dataBase.OrdersList(req.Context(), UserID)
 
-	// db := dataBase.DB
-	// order := "select ordernumber as number, orderstatus as status, accrual, uploaded_at from orders where usercode=$1 order by uploaded_at ;"
-
-	// rows, err := db.Query(req.Context(), order, UserID) //
-	// if err != nil {
-	// 	rwr.WriteHeader(http.StatusInternalServerError) //500 — внутренняя ошибка сервера.
-	// 	fmt.Fprintf(rwr, `{"status":"StatusInternalServerError"}`)
-	// 	models.Sugar.Debugf("db.Query %+v\n", err)
-	// 	return
-	// }
-
-	// ord := models.OrdStruct{}
-	// orda := []models.OrdStruct{}
-	// var errScan error
-	// for rows.Next() {
-	// 	var tm time.Time
-	// 	errScan = rows.Scan(&ord.Number, &ord.Status, &ord.Accrual, &tm)
-	// 	ord.UploadedAt = tm.Format(time.RFC3339)
-	// 	if errScan != nil {
-	// 		break
-	// 	}
-	// 	orda = append(orda, ord)
-	// }
-	// rows.Close()
-
-	// if err := rows.Err(); err != nil || errScan != nil { // Err returns any error that occurred while reading. Err must only be called after the Rows is closed
-	// 	rwr.WriteHeader(http.StatusInternalServerError) // //500 — внутренняя ошибка сервера.
-	// 	fmt.Fprintf(rwr, `{"status":"StatusInternalServerError"}`)
-	// 	models.Sugar.Debugf("db.Query %+v\n", err)
-	// 	return
-	// }
 	if status == http.StatusInternalServerError {
 		rwr.WriteHeader(http.StatusInternalServerError) //500 — внутренняя ошибка сервера.
 		fmt.Fprintf(rwr, `{"status":"StatusInternalServerError"}`)
@@ -65,6 +35,5 @@ func (dataBase *DBstruct) GetOrders(rwr http.ResponseWriter, req *http.Request) 
 	}
 	rwr.WriteHeader(http.StatusOK)
 	models.Sugar.Debugf("orda[0].Status  \"%+v\"\n", orda[0].Status)
-	//	fmt.Fprintf(rwr, `{"status":"StatusOK"}`)
 	json.NewEncoder(rwr).Encode(orda)
 }

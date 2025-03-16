@@ -149,18 +149,6 @@ func (dataBase *DBstruct) GetIDByOrder(ctx context.Context, orderNum int64, orde
 	return nil
 }
 
-// func (dataBase *DBstruct) AddOrder(ctx context.Context, userName string, orderNumber int64, orderStatus string, accrual float64) error {
-// 	db := dataBase.DB
-
-// 	order := "INSERT INTO orders(userCode, ordernumber, orderStatus, accrual) VALUES ((select id from accounts where login = $1), $2, $3, $4) ;"
-
-// 	_, err := db.Exec(ctx, order, userName, orderNumber, orderStatus, accrual)
-// 	if err != nil {
-// 		return fmt.Errorf("add ORDER %w", err)
-// 	}
-// 	return nil
-// }
-
 func (dataBase *DBstruct) LoginByToken(rwr http.ResponseWriter, req *http.Request) (int64, error) {
 
 	tokenStr := req.Header.Get("Authorization")

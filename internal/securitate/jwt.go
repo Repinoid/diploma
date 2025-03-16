@@ -15,20 +15,6 @@ type Claims struct {
 const TokenExp = time.Hour * 3
 const SecretKey = "supersecretkey"
 
-// func main() {
-// 	tokenString, err := BuildJWTString("tokena", []byte(SecretKey))
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	fmt.Println(tokenString)
-
-// 	cla, err := CheckToken(tokenString, []byte(SecretKey))
-// 	if err != nil {
-// 		fmt.Printf("Wrong tocken %v\n", err)
-// 	}
-
-// 	fmt.Println(cla.IssuedAt, "\t", cla.ExpiresAt)
-// }
 
 func BuildJWTString(id string, secret []byte) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{

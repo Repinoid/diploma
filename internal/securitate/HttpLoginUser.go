@@ -11,6 +11,7 @@ import (
 	"github.com/Repinoid/diploma56/internal/models"
 )
 
+// api/user/login
 func (dataBase *DBstruct) LoginUser(rwr http.ResponseWriter, req *http.Request) {
 
 	if !strings.Contains(req.Header.Get("Content-Type"), "application/json") {

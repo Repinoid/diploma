@@ -8,6 +8,7 @@ import (
 	"github.com/Repinoid/diploma56/internal/models"
 )
 
+// api/user/balance
 func (dataBase *DBstruct) GetBalance(rwr http.ResponseWriter, req *http.Request) {
 	rwr.Header().Set("Content-Type", "application/json")
 

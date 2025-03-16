@@ -12,6 +12,7 @@ import (
 	"github.com/theplant/luhn"
 )
 
+// api/user/orders", Interbase.PutOrder).Methods("POST")
 func (dataBase *DBstruct) PutOrder(rwr http.ResponseWriter, req *http.Request) {
 
 	rwr.Header().Set("Content-Type", "application/json")
@@ -48,8 +49,6 @@ func (dataBase *DBstruct) PutOrder(rwr http.ResponseWriter, req *http.Request) {
 	var orderID int64
 	err = dataBase.GetIDByOrder(req.Context(), orderNum, &orderID)
 	if err != nil { // если такого номера заказа нет в базе вносим его
-
-		//	orderStat, _, _ := rual.GetFromAccrual(orderStr)
 
 		if dataBase.UpLoadOrderByID(req.Context(), UserID, orderNum, "NEW") != nil {
 			rwr.WriteHeader(http.StatusInternalServerError) //500 — внутренняя ошибка сервера.

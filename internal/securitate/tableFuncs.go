@@ -78,7 +78,6 @@ func (dataBase *DBstruct) WithdrawalsList(ctx context.Context, UserID int64) (or
 	}
 
 	ord := WithStruct{}
-	//	orda := []WithStruct{}
 	var errScan error
 	for rows.Next() {
 		var tm time.Time
@@ -99,7 +98,6 @@ func (dataBase *DBstruct) WithdrawalsList(ctx context.Context, UserID int64) (or
 	return
 }
 
-// func (dataBase *DBstruct) AccuOrders(ctx context.Context) (err error) {
 func (dataBase *DBstruct) AccuOrders(ctx context.Context) (err error) {
 
 	db := dataBase.DB
@@ -159,7 +157,7 @@ func (dataBase *DBstruct) AccuOrders(ctx context.Context) (err error) {
 			//		status = http.StatusInternalServerError //500 — внутренняя ошибка сервера.
 			models.Sugar.Debugf(" tx.Commit %+v\n", err)
 		}
-		time.Sleep(time.Second)
+		time.Sleep(time.Second)	// секунда задержки ... а сколько надо ставить ? или надо запускать после/перед каждым http обращением к таблице заказов ? триггеря через канал, например
 	}
 	//	status = http.StatusOK
 	//	return

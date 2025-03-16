@@ -11,8 +11,8 @@ import (
 	"github.com/Repinoid/diploma56/internal/models"
 )
 
+// api/user/register
 func (dataBase *DBstruct) RegisterUser(rwr http.ResponseWriter, req *http.Request) {
-	//	var inter securitate.Inter = models.Interbase
 
 	if !strings.Contains(req.Header.Get("Content-Type"), "application/json") {
 		rwr.WriteHeader(http.StatusBadRequest) //400 — неверный формат запроса;

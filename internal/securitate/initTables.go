@@ -48,8 +48,6 @@ func (dataBase *DBstruct) TokensTableCreation(ctx context.Context) error {
 		"CREATE TABLE IF NOT EXISTS " + "tokens" +
 			"(id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY," +
 			"userCode INT NOT NULL UNIQUE," +
-			//			"balance FLOAT8 DEFAULT 0," +
-			//			"bonus FLOAT8 DEFAULT 0," +
 			"token VARCHAR(1000) NOT NULL," +
 			"token_valid_until TIMESTAMP," +
 			"token_created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
@@ -60,6 +58,7 @@ func (dataBase *DBstruct) TokensTableCreation(ctx context.Context) error {
 	}
 	return nil
 }
+
 func (dataBase *DBstruct) WithdrawalsTableCreation(ctx context.Context) error {
 	db := dataBase.DB
 	creatorOrder :=

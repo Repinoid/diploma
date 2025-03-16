@@ -13,6 +13,7 @@ import (
 	"github.com/theplant/luhn"
 )
 
+// /api/user/balance/withdraw
 func (dataBase *DBstruct) Withdraw(rwr http.ResponseWriter, req *http.Request) {
 	rwr.Header().Set("Content-Type", "application/json")
 
@@ -56,12 +57,6 @@ func (dataBase *DBstruct) Withdraw(rwr http.ResponseWriter, req *http.Request) {
 
 		current, withdr, err := dataBase.GetBalanceAndWithdrawn(req.Context(), UserID)
 
-		//	db := dataBase.DB
-		// ordr := "SELECT (SELECT SUM(orders.accrual) FROM orders where orders.usercode=$1)- " +
-		// 	"(SELECT COALESCE(SUM(withdrawn.amount),0) FROM withdrawn where withdrawn.usercode=$1) ;"
-		// row := db.QueryRow(req.Context(), ordr, UserID) //
-		// var accs float64                                // денег на счету
-		// err := row.Scan(&accs)
 		if err != nil {
 			rwr.WriteHeader(http.StatusUnprocessableEntity) // 422 — неверный формат номера заказа;
 			fmt.Fprintf(rwr, `{"status":"StatusUnprocessableEntity"}`)
@@ -76,8 +71,6 @@ func (dataBase *DBstruct) Withdraw(rwr http.ResponseWriter, req *http.Request) {
 		}
 		// -------------------------------------------------------------------------
 		err = dataBase.AddToWithdrawn(req.Context(), UserID, orderNum, wdrStruct.Sum)
-		//	ordr := "INSERT INTO withdrawn(userCode, orderNumber, amount) VALUES ($1, $2, $3) ;"
-		//	_, err = db.Exec(req.Context(), ordr, UserID, orderNum, wdrStruct.Sum)
 		if err != nil {
 			rwr.WriteHeader(http.StatusInternalServerError) //500 — внутренняя ошибка сервера.
 			fmt.Fprintf(rwr, `{"status":"StatusInternalServerError"}`)
@@ -85,7 +78,7 @@ func (dataBase *DBstruct) Withdraw(rwr http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		err = dataBase.UpLoadOrderByID(req.Context(), UserID, orderNum, "INVALID")	// INVALID - т.к. заказ не принят к расчёту, и вознаграждение не будет начислено;
+		err = dataBase.UpLoadOrderByID(req.Context(), UserID, orderNum, "INVALID") // INVALID - т.к. cashback, и вознаграждение не будет начислено;
 		if err != nil {
 			rwr.WriteHeader(http.StatusInternalServerError) //500 — внутренняя ошибка сервера.
 			fmt.Fprintf(rwr, `{"status":"StatusInternalServerError"}`)
