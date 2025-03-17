@@ -136,6 +136,7 @@ func (dataBase *DBstruct) AccuOrders(ctx context.Context) (err error) {
 		if err != nil {
 			models.Sugar.Debugf("error db.Begin  %[1]w", err)
 		}
+		defer tx.Rollback(ctx)
 
 		for _, ord := range orda {
 			accuOrderStat, status, err := rual.GetFromAccrual(ord.Number)
@@ -146,7 +147,6 @@ func (dataBase *DBstruct) AccuOrders(ctx context.Context) (err error) {
 			updateOrder := "UPDATE orders SET orderStatus = $2, accrual = $3 WHERE orderNumber  = $1 ;"
 			_, err = tx.Exec(ctx, updateOrder, ord.Number, accuOrderStat.Status, accuOrderStat.Accrual)
 			if err != nil {
-				defer tx.Rollback(ctx)
 				models.Sugar.Debugf("error exex %v", err)
 				return err
 			}
@@ -157,7 +157,7 @@ func (dataBase *DBstruct) AccuOrders(ctx context.Context) (err error) {
 			//		status = http.StatusInternalServerError //500 — внутренняя ошибка сервера.
 			models.Sugar.Debugf(" tx.Commit %+v\n", err)
 		}
-		time.Sleep(time.Second)	// секунда задержки ... а сколько надо ставить ? или надо запускать после/перед каждым http обращением к таблице заказов ? триггеря через канал, например
+		time.Sleep(time.Second) // секунда задержки ... а сколько надо ставить ? или надо запускать после/перед каждым http обращением к таблице заказов ? триггеря через канал, например
 	}
 	//	status = http.StatusOK
 	//	return
