@@ -55,37 +55,34 @@ func (dataBase *DBstruct) GetBalanceAndWithdrawn(ctx context.Context, UserID int
 
 }
 
-func (dataBase *DBstruct) OrdersList(ctx context.Context, UserID int64) (orda []OrdStruct, status int, err error) {
+func (dataBase *DBstruct) OrdersList(ctx context.Context, UserID int64) (orda []OrdStruct, err error) {
 
 	db := dataBase.DB
 	order := "select ordernumber as number, orderstatus as status, accrual, uploaded_at from orders where usercode=$1 order by uploaded_at ;"
 	rows, err := db.Query(ctx, order, UserID) //
 	if err != nil {
-		status = http.StatusInternalServerError //500 — внутренняя ошибка сервера.
 		models.Sugar.Debugf("db.Query %+v\n", err)
 		return
 	}
 	ord := OrdStruct{}
 	//	orda := []models.OrdStruct{}
-	var errScan error
+	//var errScan error
 	for rows.Next() {
 		var tm time.Time
-		errScan = rows.Scan(&ord.Number, &ord.Status, &ord.Accrual, &tm)
+		err = rows.Scan(&ord.Number, &ord.Status, &ord.Accrual, &tm)
 		ord.UploadedAt = tm.Format(time.RFC3339)
-		if errScan != nil {
-			break
+		if err != nil {
+			return
 		}
 		orda = append(orda, ord)
 	}
-	rows.Close()
+	defer rows.Close()
 
-	if err = rows.Err(); err != nil || errScan != nil { // Err returns any error that occurred while reading. Err must only be called after the Rows is closed
-		status = http.StatusInternalServerError // //500 — внутренняя ошибка сервера.
+	err = rows.Err()
+	if err != nil { // Err returns any error that occurred while reading. Err must only be called after the Rows is closed
 		models.Sugar.Debugf("db.Query %+v\n", err)
 		return
 	}
-
-	status = http.StatusOK
 	return
 }
 

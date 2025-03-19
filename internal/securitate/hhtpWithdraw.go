@@ -65,7 +65,6 @@ func (dataBase *DBstruct) Withdraw(rwr http.ResponseWriter, req *http.Request) {
 		// -------------------------------------------------------------------------
 		noMany, err := dataBase.TryWithdraw(req.Context(), UserID, orderNum, wdrStruct.Sum)
 
-		//		current, withdr, err := dataBase.GetBalanceAndWithdrawn(req.Context(), UserID)
 		if err != nil {
 			rwr.WriteHeader(http.StatusUnprocessableEntity) // 422 — неверный формат номера заказа;
 			fmt.Fprintf(rwr, `{"status":"StatusUnprocessableEntity"}`)

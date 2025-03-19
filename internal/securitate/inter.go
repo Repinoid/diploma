@@ -58,7 +58,7 @@ type Inter interface {
 	GetIDByOrder(ctx context.Context, orderNum int64) (int64, error)
 	LoginByToken(rwr http.ResponseWriter, req *http.Request) (int64, error)
 
-	OrdersList(ctx context.Context, UserID int64) (orda []OrdStruct, status int, err error)
+	OrdersList(ctx context.Context, UserID int64) (orda []OrdStruct, err error)
 	WithdrawalsList(ctx context.Context, UserID int64) (orda []WithStruct, status int, err error)
 	GetBalanceAndWithdrawn(ctx context.Context, UserID int64) (current, withdr float64, err error)
 	TryWithdraw(ctx context.Context, UserID, orderNum int64, howmuch float64) (notEnough bool, err error)

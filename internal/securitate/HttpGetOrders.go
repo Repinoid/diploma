@@ -18,9 +18,9 @@ func (dataBase *DBstruct) GetOrders(rwr http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	orda, status, err := dataBase.OrdersList(req.Context(), UserID)
+	orda, err := dataBase.OrdersList(req.Context(), UserID)
 
-	if status == http.StatusInternalServerError {
+	if err != nil {
 		rwr.WriteHeader(http.StatusInternalServerError) //500 — внутренняя ошибка сервера.
 		fmt.Fprintf(rwr, `{"status":"StatusInternalServerError"}`)
 		models.Sugar.Debugf("db.Query %+v\n", err)
