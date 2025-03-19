@@ -136,17 +136,17 @@ func (dataBase *DBstruct) UpLoadOrderByID(ctx context.Context, userID int64, ord
 	return nil
 }
 
-func (dataBase *DBstruct) GetIDByOrder(ctx context.Context, orderNum int64, orderID *int64) error {
+func (dataBase *DBstruct) GetIDByOrder(ctx context.Context, orderNum int64) (int64, error) {
 	db := dataBase.DB
 	order := "SELECT usercode from " + "orders" + " WHERE orderNumber =  $1 ;"
 	row := db.QueryRow(ctx, order, orderNum)
 	var id int64
 	err := row.Scan(&id)
 	if err != nil {
-		return fmt.Errorf("GT %w", err)
+		return id, fmt.Errorf("GT %w", err)
 	}
-	*orderID = id
-	return nil
+//	*orderID = id
+	return id, nil
 }
 
 func (dataBase *DBstruct) LoginByToken(rwr http.ResponseWriter, req *http.Request) (int64, error) {

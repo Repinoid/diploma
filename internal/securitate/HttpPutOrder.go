@@ -46,8 +46,8 @@ func (dataBase *DBstruct) PutOrder(rwr http.ResponseWriter, req *http.Request) {
 		models.Sugar.Debugf("422 — неверный формат номера заказа; %d\n", orderNum)
 		return
 	}
-	var orderID int64
-	err = dataBase.GetIDByOrder(req.Context(), orderNum, &orderID)
+//	var orderID int64
+	orderID, err := dataBase.GetIDByOrder(req.Context(), orderNum)
 	if err != nil { // если такого номера заказа нет в базе вносим его
 
 		if dataBase.UpLoadOrderByID(req.Context(), UserID, orderNum, "NEW") != nil {
