@@ -64,8 +64,6 @@ func (dataBase *DBstruct) OrdersList(ctx context.Context, UserID int64) (orda []
 		return
 	}
 	ord := OrdStruct{}
-	//	orda := []models.OrdStruct{}
-	//var errScan error
 	for rows.Next() {
 		var tm time.Time
 		err = rows.Scan(&ord.Number, &ord.Status, &ord.Accrual, &tm)
@@ -143,12 +141,6 @@ func (dataBase *DBstruct) AccuOrders(ctx context.Context) (err error) {
 			return err
 		}
 
-		// tx, err := db.Begin(ctx)
-		// if err != nil {
-		// 	models.Sugar.Debugf("error db.Begin  %[1]w", err)
-		// }
-		// defer tx.Rollback(ctx)
-
 		for _, ord := range orda {
 			accuOrderStat, status, err := rual.GetFromAccrual(ord.Number)
 			if err != nil {
@@ -163,11 +155,7 @@ func (dataBase *DBstruct) AccuOrders(ctx context.Context) (err error) {
 			}
 
 		}
-		// err = tx.Commit(ctx)
-		// if err != nil {
-		// 	//		status = http.StatusInternalServerError //500 — внутренняя ошибка сервера.
-		// 	models.Sugar.Debugf(" tx.Commit %+v\n", err)
-		// }
+
 		time.Sleep(time.Second) // секунда задержки ... а сколько надо ставить ? или надо запускать после/перед каждым http обращением к таблице заказов ? триггеря через канал, например
 	}
 }

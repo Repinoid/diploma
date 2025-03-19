@@ -93,12 +93,15 @@ func Luhner(numb int) int {
 // OrderStatus - {номер заказа; статус расчёта начисления; рассчитанные баллы к начислению}
 func GetFromAccrual(number string) (OrderStatus, int, error) {
 
+	var mutter sync.Mutex
+	mutter.Lock()
 	wait429 := time.Until(Time429) // время до разморозки
+	mutter.Unlock()
+
 	time.Sleep(wait429)
 
 	httpc := resty.New() //
 	httpc.SetBaseURL(Accrualhost)
-	//	httpc.SetBaseURL("http://" + Accrualhost)
 	getReq := httpc.R()
 
 	orderStat := &OrderStatus{}
@@ -122,7 +125,6 @@ func GetFromAccrual(number string) (OrderStatus, int, error) {
 			mutter.Lock()
 			Time429 = time.Now().Add(time.Duration(dTime) * time.Second)
 			mutter.Unlock()
-			//		time.Sleep(time.Duration(dTime) * time.Second)
 		}
 	}
 	return *orderStat, resp.StatusCode(), nil
