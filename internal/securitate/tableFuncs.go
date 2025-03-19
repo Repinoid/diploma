@@ -9,6 +9,40 @@ import (
 	"github.com/Repinoid/diploma56/internal/rual"
 )
 
+func (dataBase *DBstruct) TryWithdraw(ctx context.Context, UserID, orderNum int64, howmuch float64) (notEnough bool, err error) {
+	db := dataBase.DB
+
+	tx, err := db.Begin(ctx)
+	if err != nil {
+		models.Sugar.Debugf("error db.Begin  %[1]w", err)
+	}
+	ordr := "INSERT INTO withdrawn(userCode, orderNumber, amount) VALUES ($1, $2, $3) ;" // добавить в withdrawn сумму списания
+	_, err = tx.Exec(ctx, ordr, UserID, orderNum, howmuch)
+	if err != nil {
+		models.Sugar.Debugf("tx.Exec %+v\n", err)
+		return false, err
+	}
+	order := "SELECT (SELECT SUM(orders.accrual) FROM orders where orders.usercode=$1) - " + // получить разницу суммы кешбеков и списаний
+		"(SELECT COALESCE(SUM(withdrawn.amount),0) FROM withdrawn  where withdrawn.usercode=$1) ;"
+	var val float64
+	row := tx.QueryRow(ctx, order, UserID)
+	err = row.Scan(&val)
+	if err != nil {
+		models.Sugar.Debugf("row.Scan %+v\n", err)
+		return false, err
+	}
+	if val < 0 { // если бабла недостаточно откатываем транзакцию
+		tx.Rollback(ctx)
+		return true, err // true - no $$$
+	}
+	err = tx.Commit(ctx)
+	if err != nil {
+		models.Sugar.Debugf(" tx.Commit %+v\n", err)
+		return false, err
+	}
+	return false, err
+}
+
 func (dataBase *DBstruct) GetBalanceAndWithdrawn(ctx context.Context, UserID int64) (current, withdr float64, err error) {
 	db := dataBase.DB
 
@@ -17,16 +51,6 @@ func (dataBase *DBstruct) GetBalanceAndWithdrawn(ctx context.Context, UserID int
 
 	row := db.QueryRow(ctx, order, UserID)
 	err = row.Scan(&current, &withdr)
-	return
-
-}
-
-func (dataBase *DBstruct) AddToWithdrawn(ctx context.Context, UserID, orderNum int64, sum float64) (err error) {
-	db := dataBase.DB
-
-	ordr := "INSERT INTO withdrawn(userCode, orderNumber, amount) VALUES ($1, $2, $3) ;"
-	_, err = db.Exec(ctx, ordr, UserID, orderNum, sum)
-
 	return
 
 }

@@ -61,30 +61,26 @@ func (dataBase *DBstruct) Withdraw(rwr http.ResponseWriter, req *http.Request) {
 		models.Sugar.Debug("422 — неверный формат номера заказа;\n")
 	}
 	if errors.Is(err, pgx.ErrNoRows) { //если запись не найдена
-		current, withdr, err := dataBase.GetBalanceAndWithdrawn(req.Context(), UserID)
 
+		// -------------------------------------------------------------------------
+		noMany, err := dataBase.TryWithdraw(req.Context(), UserID, orderNum, wdrStruct.Sum)
+
+		//		current, withdr, err := dataBase.GetBalanceAndWithdrawn(req.Context(), UserID)
 		if err != nil {
 			rwr.WriteHeader(http.StatusUnprocessableEntity) // 422 — неверный формат номера заказа;
 			fmt.Fprintf(rwr, `{"status":"StatusUnprocessableEntity"}`)
 			models.Sugar.Debugf("422 — невернная сумма на списание; %d\n", wdrStruct.Sum)
 			return
 		}
-		if wdrStruct.Sum > current-withdr { // денег на счету
+		//		if wdrStruct.Sum > current-withdr { // денег на счету
+		if noMany { // если бабла было недостаточно
 			rwr.WriteHeader(http.StatusPaymentRequired) //402 Payment Required
 			fmt.Fprintf(rwr, `{"status":"StatusPaymentRequired"}`)
 			models.Sugar.Debug("402 Payment Required\n")
 			return
 		}
-		// -------------------------------------------------------------------------
-		err = dataBase.AddToWithdrawn(req.Context(), UserID, orderNum, wdrStruct.Sum)
-		if err != nil {
-			rwr.WriteHeader(http.StatusInternalServerError) //500 — внутренняя ошибка сервера.
-			fmt.Fprintf(rwr, `{"status":"StatusInternalServerError"}`)
-			models.Sugar.Debug("error insert 2 withdrawn.\n")
-			return
-		}
 
-		err = dataBase.UpLoadOrderByID(req.Context(), UserID, orderNum, "INVALID") // INVALID - т.к. cashback, и вознаграждение не будет начислено;
+		err = dataBase.UpLoadOrderByID(req.Context(), UserID, orderNum, "WITHDRAWN") // Лучше использовать вообще иной статус. Например, WITHDRAWN.
 		if err != nil {
 			rwr.WriteHeader(http.StatusInternalServerError) //500 — внутренняя ошибка сервера.
 			fmt.Fprintf(rwr, `{"status":"StatusInternalServerError"}`)

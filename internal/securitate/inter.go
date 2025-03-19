@@ -61,7 +61,7 @@ type Inter interface {
 	OrdersList(ctx context.Context, UserID int64) (orda []OrdStruct, status int, err error)
 	WithdrawalsList(ctx context.Context, UserID int64) (orda []WithStruct, status int, err error)
 	GetBalanceAndWithdrawn(ctx context.Context, UserID int64) (current, withdr float64, err error)
-	AddToWithdrawn(ctx context.Context, UserID, orderNum int64, sum float64) (err error)
+	TryWithdraw(ctx context.Context, UserID, orderNum int64, howmuch float64) (notEnough bool, err error)
 
 	AccuOrders(ctx context.Context) (err error)
 }
