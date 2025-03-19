@@ -2,7 +2,6 @@ package securitate
 
 import (
 	"context"
-	"net/http"
 	"time"
 
 	"github.com/Repinoid/diploma56/internal/models"
@@ -86,36 +85,33 @@ func (dataBase *DBstruct) OrdersList(ctx context.Context, UserID int64) (orda []
 	return
 }
 
-func (dataBase *DBstruct) WithdrawalsList(ctx context.Context, UserID int64) (orda []WithStruct, status int, err error) {
+func (dataBase *DBstruct) WithdrawalsList(ctx context.Context, UserID int64) (orda []WithStruct, err error) {
 
 	db := dataBase.DB
 	order := "select ordernumber as number, amount as sum, processed_at from withdrawn where usercode=$1 order by processed_at ;"
 
 	rows, err := db.Query(ctx, order, UserID) //
 	if err != nil {
-		status = http.StatusInternalServerError //500 — внутренняя ошибка сервера.
 		models.Sugar.Debugf("db.Query %+v\n", err)
 		return
 	}
 
 	ord := WithStruct{}
-	var errScan error
 	for rows.Next() {
 		var tm time.Time
-		errScan = rows.Scan(&ord.Order, &ord.Sum, &tm)
+		err = rows.Scan(&ord.Order, &ord.Sum, &tm)
 		ord.ProcessedAt = tm.Format(time.RFC3339)
-		if errScan != nil {
-			break
+		if err != nil {
+			return
 		}
 		orda = append(orda, ord)
 	}
-	rows.Close()
-	if err = rows.Err(); err != nil || errScan != nil { // Err returns any error that occurred while reading. Err must only be called after the Rows is closed
-		status = http.StatusInternalServerError //500 — внутренняя ошибка сервера.
+	defer rows.Close()
+	err = rows.Err()
+	if err != nil { // Err returns any error that occurred while reading. Err must only be called after the Rows is closed
 		models.Sugar.Debugf("db.Query %+v\n", err)
 		return
 	}
-	status = http.StatusOK
 	return
 }
 
