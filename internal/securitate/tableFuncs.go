@@ -127,25 +127,20 @@ func (dataBase *DBstruct) AccuOrders(ctx context.Context) (err error) {
 		rows, err := db.Query(ctx, order) //
 		if err != nil {
 			models.Sugar.Debugf("db.Query %+v\n", err)
-			//		return
+			return err
 		}
-		var errScan error
 		for rows.Next() {
-			errScan = rows.Scan(&ord.Number, &ord.Status, &ord.Accrual)
-			if errScan != nil {
-				break
+			err = rows.Scan(&ord.Number, &ord.Status, &ord.Accrual)
+			if err != nil {
+				return err
 			}
-			// if ord.Status == "INVALID" || ord.Status == "PROCESSED" { // Статусы `INVALID` и `PROCESSED` являются окончательными.
-			// 	continue
-			// }
 			orda = append(orda, ord)
 		}
-		rows.Close()
-
-		if err = rows.Err(); err != nil || errScan != nil { // Err returns any error that occurred while reading. Err must only be called after the Rows is closed
-			//		status = http.StatusInternalServerError // //500 — внутренняя ошибка сервера.
+		defer rows.Close()
+		err = rows.Err()
+		if err != nil { // Err returns any error that occurred while reading. Err must only be called after the Rows is closed
 			models.Sugar.Debugf("db.Query %+v\n", err)
-			//	return
+			return err
 		}
 
 		tx, err := db.Begin(ctx)
