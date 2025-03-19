@@ -118,7 +118,7 @@ func (dataBase *DBstruct) WithdrawalsList(ctx context.Context, UserID int64) (or
 func (dataBase *DBstruct) AccuOrders(ctx context.Context) (err error) {
 
 	db := dataBase.DB
-	order := "select ordernumber as number, orderstatus as status, accrual from orders FOR UPDATE;" // ALL orders
+	order := "select ordernumber, orderstatus, accrual from orders WHERE orderstatus != 'INVALID' AND orderstatus != 'PROCESSED' AND orderstatus != 'WITHDRAWN' ;"
 
 	for {
 
@@ -126,7 +126,6 @@ func (dataBase *DBstruct) AccuOrders(ctx context.Context) (err error) {
 		orda := []OrdStruct{}
 		rows, err := db.Query(ctx, order) //
 		if err != nil {
-			//		status = http.StatusInternalServerError //500 — внутренняя ошибка сервера.
 			models.Sugar.Debugf("db.Query %+v\n", err)
 			//		return
 		}
@@ -136,9 +135,9 @@ func (dataBase *DBstruct) AccuOrders(ctx context.Context) (err error) {
 			if errScan != nil {
 				break
 			}
-			if ord.Status == "INVALID" || ord.Status == "PROCESSED" { // Статусы `INVALID` и `PROCESSED` являются окончательными.
-				continue
-			}
+			// if ord.Status == "INVALID" || ord.Status == "PROCESSED" { // Статусы `INVALID` и `PROCESSED` являются окончательными.
+			// 	continue
+			// }
 			orda = append(orda, ord)
 		}
 		rows.Close()
