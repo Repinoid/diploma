@@ -2,6 +2,7 @@ package securitate
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/Repinoid/diploma56/internal/models"
+	"github.com/jackc/pgx/v5"
 
 	"github.com/theplant/luhn"
 )
@@ -53,8 +55,12 @@ func (dataBase *DBstruct) Withdraw(rwr http.ResponseWriter, req *http.Request) {
 	}
 	//	var orderID int64
 	_, err = dataBase.GetIDByOrder(req.Context(), orderNum)
-	if err != nil { // если такого номера заказа нет в базе вносим его
-
+	if err == nil { // // если заказ уже есть
+		rwr.WriteHeader(http.StatusUnprocessableEntity) // 422 — неверный формат номера заказа;
+		fmt.Fprintf(rwr, `{"status":"StatusUnprocessableEntity"}`)
+		models.Sugar.Debug("422 — неверный формат номера заказа;\n")
+	}
+	if errors.Is(err, pgx.ErrNoRows) { //если запись не найдена
 		current, withdr, err := dataBase.GetBalanceAndWithdrawn(req.Context(), UserID)
 
 		if err != nil {
@@ -90,8 +96,8 @@ func (dataBase *DBstruct) Withdraw(rwr http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(rwr, `{"status":"StatusOK"}`)
 		return
 	}
-	rwr.WriteHeader(http.StatusUnprocessableEntity) // 422 — неверный формат номера заказа;
-	fmt.Fprintf(rwr, `{"status":"StatusUnprocessableEntity"}`)
-	models.Sugar.Debug("422 — неверный формат номера заказа;\n")
+	rwr.WriteHeader(http.StatusInternalServerError) //500 — внутренняя ошибка сервера.
+	fmt.Fprintf(rwr, `{"status":"StatusInternalServerError"}`)
+	models.Sugar.Debug("500 — внутренняя ошибка сервера.\n")
 
 }

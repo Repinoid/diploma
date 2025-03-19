@@ -143,7 +143,7 @@ func (dataBase *DBstruct) GetIDByOrder(ctx context.Context, orderNum int64) (int
 	var id int64
 	err := row.Scan(&id)
 	if err != nil {
-		return id, fmt.Errorf("GT %w", err)
+		return id, fmt.Errorf("%w", err)
 	}
 	//	*orderID = id
 	return id, nil
