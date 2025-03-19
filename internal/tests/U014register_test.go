@@ -48,9 +48,8 @@ func (suite *TstHandlers) Test04Add5Users() {
 		_, err := io.ReadAll(res.Body)
 		require.NoError(suite.T(), err)
 
-		var token string
 		for j := range ordq {
-			err := Interbase.GetToken(suite.ctx, userName, &token)
+			token, err := Interbase.GetToken(suite.ctx, userName)
 			suite.Require().NoError(err, "GetToken err")
 			tokenStr := "Bearer <" + token + ">"
 
@@ -176,8 +175,7 @@ func (suite *TstHandlers) Test01UserRegister() {
 				require.NoError(suite.T(), err)
 				require.NotEqual(suite.T(), tok.Token, "")
 
-				var tokenFromBase string
-				err = Interbase.GetToken(suite.ctx, tt.userName, &tokenFromBase)
+				tokenFromBase, err := Interbase.GetToken(suite.ctx, tt.userName)
 				if err != nil {
 					fmt.Printf("tst %v", err)
 					return

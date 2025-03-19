@@ -53,7 +53,7 @@ type Inter interface {
 	IfUserExists(ctx context.Context, userName string) error
 	ChangePassword(ctx context.Context, userName string, password string) error
 	UpdateToken(ctx context.Context, userName string, tokenString string) error
-	GetToken(ctx context.Context, userName string, tokenString *string) error
+	GetToken(ctx context.Context, userName string) (string, error)
 	UpLoadOrderByID(ctx context.Context, userID int64, orderNumber int64, orderStatus string) error
 	GetIDByOrder(ctx context.Context, orderNum int64) (int64, error)
 	LoginByToken(rwr http.ResponseWriter, req *http.Request) (int64, error)

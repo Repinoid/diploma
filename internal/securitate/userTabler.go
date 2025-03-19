@@ -112,7 +112,7 @@ func (dataBase *DBstruct) UpdateToken(ctx context.Context, userName string, toke
 	return nil
 }
 
-func (dataBase *DBstruct) GetToken(ctx context.Context, userName string, tokenString *string) error {
+func (dataBase *DBstruct) GetToken(ctx context.Context, userName string) (string, error) {
 	db := dataBase.DB
 	//				получить токен из токен-таблицы  где код пользователя равен коду юзера из юзер-таблицы с именем UserName
 	order := "SELECT token from " + "tokens" + " WHERE userCode = (select usercode from accounts where login = $1) ;"
@@ -120,10 +120,10 @@ func (dataBase *DBstruct) GetToken(ctx context.Context, userName string, tokenSt
 	var str string
 	err := row.Scan(&str)
 	if err != nil {
-		return fmt.Errorf("GT %w", err)
+		return str, fmt.Errorf("GT %w", err)
 	}
-	*tokenString = str
-	return nil
+	//	*tokenString = str
+	return str, nil
 }
 
 func (dataBase *DBstruct) UpLoadOrderByID(ctx context.Context, userID int64, orderNumber int64, orderStatus string) error {
@@ -145,7 +145,7 @@ func (dataBase *DBstruct) GetIDByOrder(ctx context.Context, orderNum int64) (int
 	if err != nil {
 		return id, fmt.Errorf("GT %w", err)
 	}
-//	*orderID = id
+	//	*orderID = id
 	return id, nil
 }
 

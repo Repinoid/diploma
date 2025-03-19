@@ -57,8 +57,9 @@ func (suite *TstHandlers) Test06WithDraw() {
 
 	for _, tt := range tests {
 		suite.Run(tt.testName, func() {
-			var token string
-			Interbase.GetToken(suite.ctx, tt.userName, &token)
+			token, err := Interbase.GetToken(suite.ctx, tt.userName)
+			suite.Require().NoError(err)
+
 			tokenStr := "Bearer <" + token + ">"
 
 			OrderStr := strconv.Itoa(tt.orderNum)

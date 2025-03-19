@@ -49,8 +49,9 @@ func (suite *TstHandlers) Test08GetBalance() {
 
 	for _, tt := range tests {
 		suite.Run(tt.testName, func() {
-			var token string
-			Interbase.GetToken(suite.ctx, tt.username, &token)
+			token, err := Interbase.GetToken(suite.ctx, tt.username)
+			suite.Require().NoError(err)
+
 			request := httptest.NewRequest(http.MethodGet, "/api/user/balance", nil)
 			w := httptest.NewRecorder()
 			request.Header.Set("Content-Type", "application/json")

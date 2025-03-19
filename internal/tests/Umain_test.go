@@ -76,3 +76,5 @@ func TestHandlersSuite(t *testing.T) {
 	log.Println("before run")
 	suite.Run(t, new(TstHandlers))
 }
+
+// go test ./... -v -coverpkg=./...
