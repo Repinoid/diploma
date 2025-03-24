@@ -47,8 +47,8 @@ func (dataBase *DBstruct) PutOrder(rwr http.ResponseWriter, req *http.Request) {
 		models.Sugar.Debugf("422 — неверный формат номера заказа; %d\n", orderNum)
 		return
 	}
-	//	var orderID int64
-	orderID, err := dataBase.GetIDByOrder(req.Context(), orderNum)
+
+	usedIDofOrder, err := dataBase.GetUserIDByOrder(req.Context(), orderNum)
 	if err != nil { // если такого номера заказа нет в базе вносим его
 
 		// если ошибка не ErrNoRows далее не пойдёт
@@ -63,7 +63,7 @@ func (dataBase *DBstruct) PutOrder(rwr http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(rwr, `{"status":"StatusAccepted"}`)
 		return
 	}
-	if orderID == UserID {
+	if usedIDofOrder == UserID {
 		rwr.WriteHeader(http.StatusOK) // 200 — номер заказа уже был загружен ЭТИМ пользователем;
 		fmt.Fprintf(rwr, `{"status":"StatusOK"}`)
 		models.Sugar.Debug("200 — номер заказа уже был загружен ЭТИМ пользователем;\n")

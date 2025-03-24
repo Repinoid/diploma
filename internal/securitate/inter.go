@@ -55,7 +55,7 @@ type Inter interface {
 	UpdateToken(ctx context.Context, userName string, tokenString string) error
 	GetToken(ctx context.Context, userName string) (string, error)
 	UpLoadOrderByID(ctx context.Context, userID int64, orderNumber int64, orderStatus string) error
-	GetIDByOrder(ctx context.Context, orderNum int64) (int64, error)
+	GetUserIDByOrder(ctx context.Context, orderNum int64) (int64, error)
 	LoginByToken(rwr http.ResponseWriter, req *http.Request) (int64, error)
 
 	OrdersList(ctx context.Context, UserID int64) (orda []OrdStruct, err error)

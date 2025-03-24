@@ -136,7 +136,7 @@ func (dataBase *DBstruct) UpLoadOrderByID(ctx context.Context, userID int64, ord
 	return nil
 }
 
-func (dataBase *DBstruct) GetIDByOrder(ctx context.Context, orderNum int64) (int64, error) {
+func (dataBase *DBstruct) GetUserIDByOrder(ctx context.Context, orderNum int64) (int64, error) {
 	db := dataBase.DB
 	order := "SELECT usercode from " + "orders" + " WHERE orderNumber =  $1 ;"
 	row := db.QueryRow(ctx, order, orderNum)

@@ -54,7 +54,7 @@ func (dataBase *DBstruct) Withdraw(rwr http.ResponseWriter, req *http.Request) {
 		return
 	}
 	//	var orderID int64
-	_, err = dataBase.GetIDByOrder(req.Context(), orderNum)
+	_, err = dataBase.GetUserIDByOrder(req.Context(), orderNum)
 	if err == nil { // // если заказ уже есть
 		rwr.WriteHeader(http.StatusUnprocessableEntity) // 422 — неверный формат номера заказа;
 		fmt.Fprintf(rwr, `{"status":"StatusUnprocessableEntity"}`)
