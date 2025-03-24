@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/Repinoid/diploma56/internal/models"
+	"github.com/jackc/pgx/v5"
 
 	"github.com/theplant/luhn"
 )
@@ -46,11 +47,12 @@ func (dataBase *DBstruct) PutOrder(rwr http.ResponseWriter, req *http.Request) {
 		models.Sugar.Debugf("422 — неверный формат номера заказа; %d\n", orderNum)
 		return
 	}
-//	var orderID int64
+	//	var orderID int64
 	orderID, err := dataBase.GetIDByOrder(req.Context(), orderNum)
 	if err != nil { // если такого номера заказа нет в базе вносим его
 
-		if dataBase.UpLoadOrderByID(req.Context(), UserID, orderNum, "NEW") != nil {
+		// если ошибка не ErrNoRows далее не пойдёт
+		if err != pgx.ErrNoRows || dataBase.UpLoadOrderByID(req.Context(), UserID, orderNum, "NEW") != nil {
 			rwr.WriteHeader(http.StatusInternalServerError) //500 — внутренняя ошибка сервера.
 			fmt.Fprintf(rwr, `{"status":"StatusInternalServerError"}`)
 			models.Sugar.Debug("500 — внутренняя ошибка сервера.\n")
