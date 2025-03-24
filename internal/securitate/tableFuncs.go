@@ -8,6 +8,7 @@ import (
 	"github.com/Repinoid/diploma56/internal/rual"
 )
 
+// добавить в withdrawn сумму списания howmuch.  notEnough == true если средств недостаточно
 func (dataBase *DBstruct) TryWithdraw(ctx context.Context, UserID, orderNum int64, howmuch float64) (notEnough bool, err error) {
 	db := dataBase.DB
 
@@ -17,7 +18,7 @@ func (dataBase *DBstruct) TryWithdraw(ctx context.Context, UserID, orderNum int6
 		return false, err
 	}
 	defer tx.Rollback(ctx)
-	
+
 	ordr := "INSERT INTO withdrawn(userCode, orderNumber, amount) VALUES ($1, $2, $3) ;" // добавить в withdrawn сумму списания
 	_, err = tx.Exec(ctx, ordr, UserID, orderNum, howmuch)
 	if err != nil {
@@ -66,6 +67,8 @@ func (dataBase *DBstruct) OrdersList(ctx context.Context, UserID int64) (orda []
 		models.Sugar.Debugf("db.Query %+v\n", err)
 		return
 	}
+	defer rows.Close()
+
 	ord := OrdStruct{}
 	for rows.Next() {
 		var tm time.Time
@@ -76,8 +79,6 @@ func (dataBase *DBstruct) OrdersList(ctx context.Context, UserID int64) (orda []
 		}
 		orda = append(orda, ord)
 	}
-	defer rows.Close()
-
 	err = rows.Err()
 	if err != nil { // Err returns any error that occurred while reading. Err must only be called after the Rows is closed
 		models.Sugar.Debugf("db.Query %+v\n", err)
@@ -96,6 +97,7 @@ func (dataBase *DBstruct) WithdrawalsList(ctx context.Context, UserID int64) (or
 		models.Sugar.Debugf("db.Query %+v\n", err)
 		return
 	}
+	defer rows.Close()
 
 	ord := WithStruct{}
 	for rows.Next() {
@@ -107,7 +109,6 @@ func (dataBase *DBstruct) WithdrawalsList(ctx context.Context, UserID int64) (or
 		}
 		orda = append(orda, ord)
 	}
-	defer rows.Close()
 	err = rows.Err()
 	if err != nil { // Err returns any error that occurred while reading. Err must only be called after the Rows is closed
 		models.Sugar.Debugf("db.Query %+v\n", err)
@@ -119,7 +120,7 @@ func (dataBase *DBstruct) WithdrawalsList(ctx context.Context, UserID int64) (or
 func (dataBase *DBstruct) AccuOrders(ctx context.Context) (err error) {
 
 	db := dataBase.DB
-	order := "select ordernumber, orderstatus, accrual from orders WHERE orderstatus != 'INVALID' AND orderstatus != 'PROCESSED' AND orderstatus != 'WITHDRAWN' ;"
+	order := "select ordernumber, orderstatus, accrual from orders WHERE orderstatus != 'INVALID' AND orderstatus != 'PROCESSED' AND orderstatus != 'WITHDRAWN' LIMIT 1000 ;"
 
 	for {
 
@@ -130,6 +131,9 @@ func (dataBase *DBstruct) AccuOrders(ctx context.Context) (err error) {
 			models.Sugar.Debugf("db.Query %+v\n", err)
 			return err
 		}
+
+		defer rows.Close()
+
 		for rows.Next() {
 			err = rows.Scan(&ord.Number, &ord.Status, &ord.Accrual)
 			if err != nil {
@@ -137,7 +141,6 @@ func (dataBase *DBstruct) AccuOrders(ctx context.Context) (err error) {
 			}
 			orda = append(orda, ord)
 		}
-		defer rows.Close()
 		err = rows.Err()
 		if err != nil { // Err returns any error that occurred while reading. Err must only be called after the Rows is closed
 			models.Sugar.Debugf("db.Query %+v\n", err)
