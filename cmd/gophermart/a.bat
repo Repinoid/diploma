@@ -5,3 +5,5 @@ gmt -gophermart-binary-path=./gophermart.exe -accrual-binary-path=Y:/acc.exe ^
 -gophermart-port=8081 ^
 -accrual-host=localhost ^
 -accrual-port=8089
+
+pause

@@ -44,7 +44,7 @@ func (dataBase *DBstruct) AddUser(ctx context.Context, userName, password, token
 
 	tx, err := db.Begin(ctx)
 	if err != nil {
-		return fmt.Errorf("error db.Begin  %[1]w", err)
+		return fmt.Errorf("error db.Begin  %w", err)
 	}
 	defer tx.Rollback(ctx)
 
@@ -97,7 +97,7 @@ func (dataBase *DBstruct) ChangePassword(ctx context.Context, userName string, p
 	order := "UPDATE " + "accounts" + " SET password = crypt($2, gen_salt('md5')) WHERE login= $1 ;"
 	_, err := db.Exec(ctx, order, userName, password)
 	if err != nil {
-		return fmt.Errorf("change password error %w", err)
+		return err
 	}
 	return nil
 }
@@ -107,7 +107,7 @@ func (dataBase *DBstruct) UpdateToken(ctx context.Context, userName string, toke
 	order := "UPDATE tokens SET token = $2 WHERE userCode = (select usercode from accounts where login = $1) ;"
 	_, err := db.Exec(ctx, order, userName, tokenString)
 	if err != nil {
-		return fmt.Errorf("add TOKEN %w", err)
+		return err
 	}
 	return nil
 }
@@ -120,7 +120,7 @@ func (dataBase *DBstruct) GetToken(ctx context.Context, userName string) (string
 	var str string
 	err := row.Scan(&str)
 	if err != nil {
-		return str, fmt.Errorf("GT %w", err)
+		return str, err
 	}
 	//	*tokenString = str
 	return str, nil
@@ -131,7 +131,7 @@ func (dataBase *DBstruct) UpLoadOrderByID(ctx context.Context, userID int64, ord
 	order := "INSERT INTO orders(userCode, orderNumber, orderStatus, accrual) VALUES ($1, $2, $3, 0) ;" // accrual 0
 	_, err := db.Exec(ctx, order, userID, orderNumber, orderStatus)
 	if err != nil {
-		return fmt.Errorf("add ORDER %w", err)
+		return err
 	}
 	return nil
 }
@@ -143,7 +143,7 @@ func (dataBase *DBstruct) GetIDByOrder(ctx context.Context, orderNum int64) (int
 	var id int64
 	err := row.Scan(&id)
 	if err != nil {
-		return id, fmt.Errorf("%w", err)
+		return id, err
 	}
 	//	*orderID = id
 	return id, nil
