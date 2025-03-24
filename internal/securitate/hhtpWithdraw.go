@@ -2,7 +2,6 @@ package securitate
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -61,9 +60,7 @@ func (dataBase *DBstruct) Withdraw(rwr http.ResponseWriter, req *http.Request) {
 		models.Sugar.Debug("422 — неверный формат номера заказа;\n")
 		return
 	}
-	if errors.Is(err, pgx.ErrNoRows) { //если запись не найдена
-
-		// -------------------------------------------------------------------------
+	if err == pgx.ErrNoRows { //если запись не найдена
 		noMany, err := dataBase.TryWithdraw(req.Context(), UserID, orderNum, wdrStruct.Sum)
 
 		if err != nil {
