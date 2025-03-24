@@ -59,6 +59,7 @@ func (dataBase *DBstruct) Withdraw(rwr http.ResponseWriter, req *http.Request) {
 		rwr.WriteHeader(http.StatusUnprocessableEntity) // 422 — неверный формат номера заказа;
 		fmt.Fprintf(rwr, `{"status":"StatusUnprocessableEntity"}`)
 		models.Sugar.Debug("422 — неверный формат номера заказа;\n")
+		return
 	}
 	if errors.Is(err, pgx.ErrNoRows) { //если запись не найдена
 
