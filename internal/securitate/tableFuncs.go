@@ -14,7 +14,10 @@ func (dataBase *DBstruct) TryWithdraw(ctx context.Context, UserID, orderNum int6
 	tx, err := db.Begin(ctx)
 	if err != nil {
 		models.Sugar.Debugf("error db.Begin  %[1]w", err)
+		return false, err
 	}
+	defer tx.Rollback(ctx)
+	
 	ordr := "INSERT INTO withdrawn(userCode, orderNumber, amount) VALUES ($1, $2, $3) ;" // добавить в withdrawn сумму списания
 	_, err = tx.Exec(ctx, ordr, UserID, orderNum, howmuch)
 	if err != nil {
